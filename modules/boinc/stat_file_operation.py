@@ -1,11 +1,12 @@
 
+import datetime
 
 class Team:
 
     def __init__(self):
         self.attributs = {"id": None, "type": None, "name": None, "total_credit": None, "expavg_credit": None,
                           "expavg_time": None, "founder": None, "create_time": None, "description": None,
-                          "country": None}
+                          "country": None, "date": datetime.datetime.now()}
 
     def __str__(self):
         return str(self.attributs)
@@ -34,10 +35,8 @@ def search_team_in_file_by_name(file_path, name):
                 to_return = True
             else:
                 storing = False
-
         elif storing:
             team_result[tag] = fast_search_value(tag, line)
-
 
 
 def fast_search_tag(line):
