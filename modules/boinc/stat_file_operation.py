@@ -1,5 +1,5 @@
-
 import datetime
+
 
 class Team:
 
@@ -11,11 +11,30 @@ class Team:
     def __str__(self):
         return str(self.attributs)
 
+    def __repr__(self):
+        return str(self.attributs)
+
     def __setitem__(self, key, value):
         self.attributs[key] = value
 
     def __getitem__(self, item):
         return self.attributs[item]
+
+class TeamsResume:
+
+    def __init__(self):
+        self.list = {}
+
+    def insert_team(self,team):
+        self.list[team.attributs["name"]] = team
+
+    def best_value(self,team,value):
+        max_value = 0
+        for team in self.list:
+            if team.attributs[value] > max_value:
+                max_value = team.attributs[value]
+
+        return max_value
 
 
 def search_team_in_file_by_name(file_path, name):
@@ -23,7 +42,11 @@ def search_team_in_file_by_name(file_path, name):
     team_result = Team()
     to_return = False
     storing = False
-    for line in file_to_read:
+
+    a = file_to_read.read()
+    a = a.split("\\n")
+
+    for line in a:
         tag = fast_search_tag(line)
         if tag == "team":
             storing = True
@@ -37,6 +60,7 @@ def search_team_in_file_by_name(file_path, name):
                 storing = False
         elif storing:
             team_result[tag] = fast_search_value(tag, line)
+    raise Exception("Critical Error: EOF reaches without finding closing tag.")
 
 
 def fast_search_tag(line):

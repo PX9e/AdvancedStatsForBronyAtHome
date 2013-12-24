@@ -1,11 +1,15 @@
 
 
 import gzip
-from os.path import isfile
 
 
 def decompression_gz(input_file, direct_output=False):
+    """
+    This function should extract our tarball,
+    Exceptions are not handled !
+    """
     content_of_file = gzip.open(input_file, 'rb')
+
     content_of_file = content_of_file.read()
     if direct_output:
         return content_of_file
@@ -15,8 +19,4 @@ def decompression_gz(input_file, direct_output=False):
         output_file.write(str(content_of_file))
         output_file.close()
 
-        if isfile(output_file_path):
-            return output_file_path
-        else:
-            return None
-
+        return output_file_path

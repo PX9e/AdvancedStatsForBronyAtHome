@@ -12,19 +12,12 @@ def connect(address=None):
 
 
 def connection_on_database(database_name):
-    global connection
-    return connection[database_name]
-
-
-def get_collection(database_name, name):
-    return connection[database_name][name]
-
+    return db[database_name]
 
 def kill():
-    global connection
-    connection.close()
+    db.close()
 
 
-connection = None
+db = None
 
-connection = connect()
+db = connect()
