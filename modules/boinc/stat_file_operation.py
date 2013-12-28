@@ -20,6 +20,7 @@ class Team:
     def __getitem__(self, item):
         return self.attributs[item]
 
+
 class TeamsResume:
 
     def __init__(self):
@@ -28,7 +29,7 @@ class TeamsResume:
     def insert_team(self,team):
         self.list[team.attributs["name"]] = team
 
-    def best_value(self,team,value):
+    def best_value(self, team, value):
         max_value = 0
         for team in self.list:
             if team.attributs[value] > max_value:
