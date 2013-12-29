@@ -20,6 +20,10 @@ class Team:
     def __getitem__(self, item):
         return self.attributs[item]
 
+    def get_stats(self):
+        return {"name": self.attributs["name"], "name": self.attributs["total_credit"],
+                "expavg_credit": self.attributs["expavg_credit"], "expavg_time": self.attributs["expavg_time"],
+                "date": datetime.datetime.now()}
 
 class TeamsResume:
 

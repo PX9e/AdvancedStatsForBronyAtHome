@@ -7,7 +7,8 @@ from modules.utils.decompression import decompression_gz
 
 from modules.boinc.stat_file_operation import search_team_in_file_by_name
 
-from modules.database.boinc_mongo import (register_team_state_in_database)
+from modules.database.boinc_mongo import (register_team_state_in_database,
+                                          register_stats_state_in_database)
 from os import sep
 from multiprocessing.pool import Pool
 
@@ -49,22 +50,17 @@ class Harvester(object, metaclass=Singleton):
         file_to_write.close()
 
     def check_state_timer(self):
-        name = []
-        url = []
+        parameters = []
+
         for project in self.projects:
             self.projects[project]["ETA"] -= self.interval
             if self.projects[project]["ETA"] <= 0:
                 print(str(project) + " is ready to be harvested")
                 self.projects[project]["ETA"] = self.projects[project]["frequency"]
-                url.append(self.projects[project]["url"])
-                name.append(self.projects[project]["name"])
-        print(name)
-        print(url)
-        if url and name:
-            if len(url) == 1:
-                self.my_pool_of_processes.starmap(process_project_team, [(name[0], url[0])])
-            else:
-                self.my_pool_of_processes.starmap(process_project_team, [name, url])
+                parameters.append((self.projects[project]["name"], self.projects[project]["url"]))
+
+        if parameters:
+            self.my_pool_of_processes.starmap(process_project_stats, parameters)
         self.refresh = Timer(self.interval, self.check_state_timer)
         self.refresh.start()
 
@@ -89,25 +85,19 @@ def process_project_user(name, url):
     register_team_state_in_database(team, name)
 
 
-def process_project_team(name, url= "mpm"):
-    print(name)
-    print(url)
+def process_project_stats(name, url):
     from modules.database.logging import log_something
 
     try:
         log_something("HARVESTING", "TYPE_INFO", name + ": Downloading ... ")
-        print(name + ": Downloading ... ")
         file_to_extract = download_file(url + "team.gz", config["ASFBAH"]["CFG_SHARED_TMP_PATH"] + name + sep +
                                                          "team.gz")
         log_something("HARVESTING", "TYPE_INFO", name + ": Extracting ... ")
-        print("HARVESTING", "TYPE_ERROR", name + ": Extracting ... ")
         file_pr = decompression_gz(file_to_extract, False)
         log_something("HARVESTING", "TYPE_INFO", name + ": Looking for B@H data ... ")
-        print(name + ": Looking for B@H data ... ")
         team = search_team_in_file_by_name(file_pr, "Brony@Home")
         log_something("HARVESTING", "TYPE_INFO", name + ": Injecting into database ... ")
-        print(name + ": Injecting into database ... ")
-        register_team_state_in_database(team, name)
+        register_stats_state_in_database(team, name)
     except Exception as e:
         log_something("HARVESTING", "TYPE_ERROR", name + ": " + e.__repr__())
         raise e

@@ -3,14 +3,17 @@ Project ASFBAH :
 Description : 
 
 
-I am really happy of the involvment of the brony community into grid computing
-like for folding@home and a lot of boinc projects. Unfortunately I am really not
-satisfied of the statistic module on the page. So I am creating my own one. 
+I am really happy of the involvment of the brony community into grid computing thanks to Brony@home.
+Unfortunately I am really not satisfied of the statistic module. So I am creating my own one
+dedicate to Brony@Home.
 
 
-Technologies : (Temp) 
+Technologies :
 
-Python
+Python 3.3
 MongoDB
+
+You can contact me at:
+
 
 
