@@ -23,6 +23,7 @@ class Singleton(type):
 
 
 class Harvester(object, metaclass=Singleton):
+
     def __init__(self):
         configurator = configparser.ConfigParser()
         configurator.read("../../harvest.config")
@@ -39,10 +40,30 @@ class Harvester(object, metaclass=Singleton):
             except KeyError:
                 self.projects[project]["frequency"] = 6000
                 self.projects[project]["ETA"] = 6000
-        self.interval = 60
+        self.interval = 10
         self.my_pool_of_processes = Pool(int(config["ASFBAH"]["CPU_CORE_TO_USE_FOR_HARVESTING"]))
         self.refresh = None
         self.check_state_timer()
+
+    def update_configuration(self):
+        configurator = configparser.ConfigParser()
+        configurator.read("../../harvest.config")
+        for project in configurator.sections():
+            try:
+                for key in configurator[project]:
+                    self.projects[project][key] = configurator[project][key]
+                try:
+                    self.projects[project]["frequency"] = int(self.projects[project]["frequency"])
+                except KeyError:
+                    self.projects[project]["frequency"] = 6000
+            except KeyError:
+                self.projects[project] = {}
+                for key in configurator[project]:
+                    self.projects[project][key] = configurator[project][key]
+                try:
+                    self.projects[project]["frequency"] = int(self.projects[project]["frequency"])
+                except KeyError:
+                    self.projects[project]["frequency"] = 6000
 
     def write_report(self):
         file_to_write = open(config["ASFBAH"]["CFG_SHARED_TMP_PATH"] + "harvester_report", 'w')
@@ -62,6 +83,7 @@ class Harvester(object, metaclass=Singleton):
         if parameters:
             self.my_pool_of_processes.starmap(process_project_stats, parameters)
         self.refresh = Timer(self.interval, self.check_state_timer)
+        self.update_configuration()
         self.refresh.start()
 
     def stop(self):
@@ -77,7 +99,6 @@ class Harvester(object, metaclass=Singleton):
 
 
 def process_project_user(name, url):
-
     file_to_extract = download_file(url + "team.gz", config["ASFBAH"]["CFG_SHARED_TMP_PATH"] + name + sep +
                                                      "team.gz")
     file_pr = decompression_gz(file_to_extract, False)
@@ -100,4 +121,3 @@ def process_project_stats(name, url):
         register_stats_state_in_database(team, name)
     except Exception as e:
         log_something("HARVESTING", "TYPE_ERROR", name + ": " + e.__repr__())
-        raise e

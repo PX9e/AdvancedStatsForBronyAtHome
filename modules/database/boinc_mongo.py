@@ -9,7 +9,7 @@ def register_team_state_in_database(team_state_to_insert, project_name):
     db["ASFBAH"]["project_stats"][project_name]["teams"].insert(team_state_to_insert.attributs)
 
 
-def get_collection(database_name, name):
-    return db["ASFBAH"][database_name][name]["stats"]
+def get_collection(project_name):
+    return db["ASFBAH"]["project_stats"][project_name]["stats"].find({})
 
 
