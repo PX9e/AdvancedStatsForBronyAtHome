@@ -36,10 +36,10 @@ class Harvester(object, metaclass=Singleton):
         for project in self.projects:
             try:
                 self.projects[project]["frequency"] = int(self.projects[project]["frequency"])
-                self.projects[project]["ETA"] = int(self.projects[project]["frequency"])
+                self.projects[project]["ETA"] = 0
             except KeyError:
                 self.projects[project]["frequency"] = 6000
-                self.projects[project]["ETA"] = 6000
+                self.projects[project]["ETA"] = 0
         self.interval = 10
         self.my_pool_of_processes = Pool(int(config["ASFBAH"]["CPU_CORE_TO_USE_FOR_HARVESTING"]))
         self.refresh = None
@@ -102,22 +102,26 @@ def process_project_user(name, url):
     file_to_extract = download_file(url + "team.gz", config["ASFBAH"]["CFG_SHARED_TMP_PATH"] + name + sep +
                                                      "team.gz")
     file_pr = decompression_gz(file_to_extract, False)
-    team = search_team_in_file_by_name(file_pr, "Brony@Home")
+    team = search_team_in_file_by_name(file_pr, config["ASFBAH"]["TEAM"])
     register_team_state_in_database(team, name)
 
 
 def process_project_stats(name, url):
-    from modules.database.logging import log_something
+    from modules.database.logging import log_something_harvester
 
     try:
-        log_something("HARVESTING", "TYPE_INFO", name + ": Downloading ... ")
+        import time
+        start = time.time()
+        log_something_harvester(name, "TYPE_INFO", "Downloading ... ")
         file_to_extract = download_file(url + "team.gz", config["ASFBAH"]["CFG_SHARED_TMP_PATH"] + name + sep +
                                                          "team.gz")
-        log_something("HARVESTING", "TYPE_INFO", name + ": Extracting ... ")
+        log_something_harvester(name, "TYPE_INFO", "Extracting ... ")
         file_pr = decompression_gz(file_to_extract, False)
-        log_something("HARVESTING", "TYPE_INFO", name + ": Looking for B@H data ... ")
-        team = search_team_in_file_by_name(file_pr, "Brony@Home")
-        log_something("HARVESTING", "TYPE_INFO", name + ": Injecting into database ... ")
+        log_something_harvester(name, "TYPE_INFO", "Looking for "+ config["ASFBAH"]["TEAM"] + " data ... ")
+        team = search_team_in_file_by_name(file_pr, config["ASFBAH"]["TEAM"])
+        log_something_harvester(name, "TYPE_INFO", "Injecting into database ... ")
         register_stats_state_in_database(team, name)
+        elapsed = (time.time() - start)
+        log_something_harvester(name, "TYPE_INFO", "Complete in " + str(elapsed) + "sec")
     except Exception as e:
-        log_something("HARVESTING", "TYPE_ERROR", name + ": " + e.__repr__())
+        log_something_harvester(name, "TYPE_ERROR", e.__repr__())
