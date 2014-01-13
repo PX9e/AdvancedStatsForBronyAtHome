@@ -1,5 +1,6 @@
 import configparser
 from threading import Timer
+from IPython.core.display import Math
 from modules.utils.config import config
 
 from modules.network.http_request_high_level import download_file
@@ -112,6 +113,7 @@ def process_project_stats(name, url):
     try:
         import time
         start = time.time()
+        log_something_harvester(name, "TYPE_START", "STARTING ... ")
         log_something_harvester(name, "TYPE_INFO", "Downloading ... ")
         file_to_extract = download_file(url + "team.gz", config["ASFBAH"]["CFG_SHARED_TMP_PATH"] + name + sep +
                                                          "team.gz")
@@ -122,6 +124,6 @@ def process_project_stats(name, url):
         log_something_harvester(name, "TYPE_INFO", "Injecting into database ... ")
         register_stats_state_in_database(team, name)
         elapsed = (time.time() - start)
-        log_something_harvester(name, "TYPE_INFO", "Complete in " + str(elapsed) + "sec")
+        log_something_harvester(name, "TYPE_COMPLETE", "Complete in " + str(round(elapsed,3)) + " sec")
     except Exception as e:
         log_something_harvester(name, "TYPE_ERROR", e.__repr__())

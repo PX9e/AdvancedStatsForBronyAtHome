@@ -8,20 +8,24 @@ def log_something_harvester(module_name, type_of_error, message):
 
 
 def get_all_log_harvester(limit=-1, parameter_ajax=None):
-
+    order = -1
     request = db["ASFBAH"]["logging"]["harvester"]
     if parameter_ajax:
         arguments = {}
-        if parameter_ajax["datetime"]:
-            arguments["datetime"] = {'$gt': datetime.strptime(parameter_ajax["datetime"], "%Y-%m-%d %H:%M:%S.%f")}
-        if parameter_ajax["limit"]:
-            limit = parameter_ajax["limit"]
+        if "datetime" in parameter_ajax:
+            if parameter_ajax["datetime"] != "":
+                arguments["datetime"] = {'$gt': datetime.strptime(parameter_ajax["datetime"], "%Y-%m-%d %H:%M:%S.%f")}
+
+        if "limit" in parameter_ajax:
+            limit = int(parameter_ajax["limit"])
+        if "order" in parameter_ajax:
+            order = int(parameter_ajax["limit"])
         request = request.find(arguments)
     else:
         request = request.find({})
 
     if limit == -1:
-        return request.sort("datetime", -1).limit(0)
+        return request.sort("datetime", order).limit(0)
     else:
-        return request.sort("datetime", -1).limit(limit)
+        return request.sort("datetime", order).limit(limit)
 
