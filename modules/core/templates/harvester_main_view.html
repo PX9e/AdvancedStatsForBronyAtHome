@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Harvester ASFB@H Experimental Prototype</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='harvester.css') }}">
+
+</head>
+<body>
+<div class=top_menu>
+<ul>
+    <li><h3>Harvester Panel</h3></li>
+    <li><p></p><a href="/">Administration</a><p></p></li>
+</ul>
+</div>
+<div class=left_menu>
+
+
+</div>
+
+<div class=right_panel>
+
+<h3>Filtering</h3>
+
+
+</div>
+
+<div class=log_table>
+   <table>
+   <tr>
+       <th> Date </th>
+       <th> Module </th>
+       <th> Type </th>
+       <th> Message </th>
+   </tr>
+{% for log in logs%}
+    <tr>
+       <td>{{log["datetime"]}}</td>
+       <td>{{log["module"]}}</td>
+       <td>{{log["type"]}}</td>
+       <td>{{log["message"]}}</td>
+    </tr>
+{% endfor %}
+
+   </table>
+</div>
+<script type=text/javascript src="{{url_for('static', filename='jquery-1.10.2.min.js') }}"></script>
+<script>
+
+var table_h = "<table><tr><th> Date </th><th> Module </th><th> Type </th><th> Message </th></tr>";
+var last_date = "";
+var table_back = "";
+var NbRow = 20;
+function get_new_logs(){
+    var table_d = "";
+    var feedback;
+
+    $.getJSON("/harvester/log",{datetime: last_date, type:[], module:[], limit:NbRow},
+      function(feedback){ $.each(feedback.reverse(), function(i, field){
+
+                 $('div.log_table tr:last').remove();
+
+                 $('div.log_table tr:first').after("<tr><td> " + field.datetime + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
+
+                 if(i==NbRow)
+                 {
+                    last_date = field.datetime;
+                 }
+             }
+         );
+
+    setTimeout(function(){get_new_logs();}, 5000);})
+}
+
+get_new_logs()
+</script>
+</body>
+</html>
