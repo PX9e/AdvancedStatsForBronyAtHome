@@ -24,7 +24,7 @@ def app_get_stats(project):
 
 @app.route('/harvester/admin')
 def harvester_admin():
-
+    o=0
 
 @app.route('/harvester')
 def harvester_main():
