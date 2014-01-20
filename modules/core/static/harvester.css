@@ -26,7 +26,7 @@ padding:0px;
 
 .top_menu a:hover
 {
-    background-image:linear-gradient(#191919, #292929);
+    background-color:#00B8FD;
 }
 
 
@@ -92,4 +92,13 @@ color:#555555;
     margin-top: 50px;
     width:auto;
     float:left;
+}
+
+.right_panel th
+{
+width:80px;
+text-align:center;
+padding-bottom:15px;
+border-bottom:3px solid black;
+color:#555555;
 }

@@ -9,7 +9,7 @@
 <div class=top_menu>
 <ul>
     <li><h3>Harvester Panel</h3></li>
-    <li><p></p><a href="/">Administration</a><p></p></li>
+    <li><p></p><a href="/harvester/admin">Administration</a><p></p></li>
 </ul>
 </div>
 <div class=left_menu>
@@ -20,7 +20,30 @@
 <div class=right_panel>
 
 <h3>Filtering</h3>
+<form name="table_options">
 
+<h4>Types:</h4>
+<table>
+    <tr>
+       <th>Complete</th>
+       <th>Start</th>
+       <th>Info</th>
+       <th>Error</th>
+   </tr>
+     <tr>
+<td><input onclick="refresh()" type="checkbox" name="option1" value="Complete"></td>
+<td><input onclick="refresh()" type="checkbox" name="option2" value="Start"></td>
+<td><input onclick="refresh()" type="checkbox" name="option3" value="Info"></td>
+<td><input onclick="refresh()" type="checkbox" name="option4" value="Error"></td>
+    </tr>
+</table>
+<br>
+<h4>Modules:</h4>
+<input type="text" onchange="refresh()" name="module">
+<br>
+<h4>Rows:</h4>
+<input type="text" onchange="refresh()" name="rows">
+</form>
 
 </div>
 
@@ -45,16 +68,70 @@
 </div>
 <script type=text/javascript src="{{url_for('static', filename='jquery-1.10.2.min.js') }}"></script>
 <script>
+jQuery.ajaxSettings.traditional = true;
 
 var table_h = "<table><tr><th> Date </th><th> Module </th><th> Type </th><th> Message </th></tr>";
 var last_date = "";
 var table_back = "";
 var NbRow = 20;
+var types_to_print = new Array();
+
+
+function refresh(){
+    types_to_print = [];
+
+    if(table_options.option1.checked == true)
+    {
+        types_to_print.push("TYPE_COMPLETE");
+    }
+    if(table_options.option2.checked == true)
+    {
+        types_to_print.push("TYPE_START");
+    }
+    if(table_options.option3.checked == true)
+    {
+        types_to_print.push("TYPE_INFO");
+    }
+    if(table_options.option4.checked == true)
+    {
+        types_to_print.push("TYPE_ERROR");
+    }
+
+    if(types_to_print==[])
+    {
+        types_to_print.push("TYPE_COMPLETE");
+        types_to_print.push("TYPE_START");
+        types_to_print.push("TYPE_INFO");
+        types_to_print.push("TYPE_ERROR");
+    }
+    NbRow = parseInt(table_options.rows.value);
+
+    if(isNaN(NbRow))
+    {
+        NbRow = 20;
+    }
+
+    $('div.log_table tr:not(:first)').remove();
+    $.getJSON("/harvester/log",{type:types_to_print, module:[], limit:NbRow, module:table_options.module.value},
+      function(feedback){ $.each(feedback.reverse(), function(i, field){
+
+                 $('div.log_table tr:first').after("<tr><td> " + field.datetime + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
+
+                 if(i==NbRow)
+                 {
+                    last_date = field.datetime;
+                 }
+             }
+         );
+         })
+}
+
 function get_new_logs(){
+
     var table_d = "";
     var feedback;
 
-    $.getJSON("/harvester/log",{datetime: last_date, type:[], module:[], limit:NbRow},
+    $.getJSON("/harvester/log",{datetime: last_date, type:types_to_print, module:[], limit:NbRow, module:table_options.module.value},
       function(feedback){ $.each(feedback.reverse(), function(i, field){
 
                  $('div.log_table tr:last').remove();

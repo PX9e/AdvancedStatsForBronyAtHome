@@ -22,6 +22,9 @@ def app_get_stats(project):
         res += str(i)
     return res
 
+@app.route('/harvester/admin')
+def harvester_admin():
+
 
 @app.route('/harvester')
 def harvester_main():
