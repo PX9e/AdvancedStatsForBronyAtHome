@@ -3,10 +3,8 @@ Project ASFBAH :
 Description : 
 
 
-I am really happy of the involvment of the brony community into grid computing thanks to Brony@home.
-Unfortunately I am really not satisfied of the statistic module. So I am creating my own one
-dedicate to Brony@Home.
-
+Statistic module for distributed computing, dedicated for brony@home
+(it is possible to change the team in the option if you want to use it for you own team)
 
 Technologies :
 
