@@ -17,7 +17,7 @@
 
 </div>
 
-<div class=right_panel>
+<div id=menu class=right_panel>
 
 <h3>Filtering</h3>
 <form name="table_options">
@@ -39,10 +39,10 @@
 </table>
 <br>
 <h4>Modules:</h4>
-<input type="text" onchange="refresh()" name="module">
+<input type="text" onkeyup="refresh()" name="module">
 <br>
 <h4>Rows:</h4>
-<input type="text" onchange="refresh()" name="rows">
+<input type="text" onkeyup="refresh()" name="rows">
 </form>
 
 </div>
@@ -111,9 +111,10 @@ function refresh(){
         NbRow = 20;
     }
 
-    $('div.log_table tr:not(:first)').remove();
+
     $.getJSON("/harvester/log",{type:types_to_print, module:[], limit:NbRow, module:table_options.module.value},
-      function(feedback){ $.each(feedback.reverse(), function(i, field){
+      function(feedback){ $('div.log_table tr:not(:first)').remove();
+      $.each(feedback.reverse(), function(i, field){
 
                  $('div.log_table tr:first').after("<tr><td> " + field.datetime + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
 
@@ -149,6 +150,7 @@ function get_new_logs(){
 }
 
 get_new_logs()
+
 </script>
 </body>
 </html>

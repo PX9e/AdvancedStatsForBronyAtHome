@@ -26,7 +26,6 @@ def get_all_log_harvester(limit=-1, parameter_ajax=None):
             arguments["type"] = {'$in': parameter_ajax.getlist("type")}
         if "module" in parameter_ajax:
             if parameter_ajax["module"] != "":
-                import re
                 regx = re.compile("^" + parameter_ajax["module"] + ".*", re.IGNORECASE)
 
                 arguments["module"] = regx
