@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Harvester ASFB@H Experimental Prototype</title>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='administration.css') }}">
+
+</head>
+<body>
+<div class=top_menu>
+<ul>
+    <li><h3>Harvester Admin Panel</h3></li>
+    <li><p></p><a href="/harvester">Harvester logs</a><p></p></li>
+</ul>
+</div>
+
+
+<div class=log_table>
+<form name="table_options">
+
+<h4>Projects:</h4>
+<table>
+    <tr>
+       <th>Name</th>
+       <th>Url</th>
+       <th>Frequency</th>
+       <th>Representation</th>
+   </tr>
+    {% for project in projects%}
+     <tr id="{{project['_id']}}">
+<td><input type="text" name="option1" value="{{project['name']}}"></td>
+<td><input type="text" name="option2" value="{{project['url']}}"></td>
+<td><input type="text" name="option3" value="{{project['frequency']}}"></td>
+<td><input type="text" name="option4" value="{{project['representation']}}"></td>
+<td><input onclick="" type="button" name="delete" value="Delete"></td>
+<td><input onclick="alert({{project['_id']}})" type="button" name="send" value="Send"></td>
+    </tr>
+    {% endfor %}
+    <tr>
+<td><input type="text" name="option1" value=""></td>
+<td><input type="text" name="option2" value=""></td>
+<td><input type="text" name="option3" value=""></td>
+<td><input type="text" name="option4" value=""></td>
+<td><input onclick="" type="button" name="delete" value="Delete"></td>
+<td><input onclick="" type="button" name="send" value="Send"></td>
+    </tr>
+
+</table>
+    </form>
+</div>
+<script> </script>
+</body>
+</html>
