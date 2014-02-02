@@ -2,16 +2,18 @@ import datetime
 
 
 class ProjectConfiguration:
-    def __init__(self, name=None, url=None, frequency=None, representation=None, last_time_harvested=None):
+    def __init__(self, name=None, url=None, frequency=None, representation=None, last_time_harvested=None,
+                 function_to_execute=None, type_project=None):
         if frequency:
             try:
                 if not isinstance(frequency, int):
                     frequency = int(frequency)
-            except Exception:
+            except ValueError:
                 frequency = None
 
         self.attributs = {"name": name, "url": url, "frequency": frequency, "representation": representation,
-                          "last_time_harvested": last_time_harvested}
+                          "last_time_harvested": last_time_harvested, "function": function_to_execute,
+                          "type": type_project}
 
     def __str__(self):
         return str(self.attributs)
@@ -28,7 +30,8 @@ class ProjectConfiguration:
 
 class TeamStat:
     def __init__(self):
-        self.attributs = {"id": None, "type": None, "name": None, "total_credit": None, "expavg_credit": None,
+        self.attributs = {"id": None, "type": None, "project_type": None, "name": None, "total_credit": None,
+                          "expavg_credit": None,
                           "expavg_time": None, "founder": None, "create_time": None, "description": None,
                           "country": None, "date": datetime.datetime.now()}
 
@@ -66,20 +69,37 @@ class TeamsResume:
         return max_value
 
 
-def search_team_in_file_by_name(file_path, name):
+def search_team_in_file_by_name_fah(file_path, name):
+    file_to_read = open(file_path, "rb")
+    team_result = TeamStat()
+    pattern = "\t" + name + "\t"
+    for line in file_to_read.readlines():
+        oper = line.decode()
+        if oper.find(pattern) > -1:
+            the_line = oper.strip("\n")
+            the_data = the_line.split("\t")
+            team_result["id"] = the_data[0]
+            team_result["name"] = the_data[1]
+            team_result["total_credit"] = the_data[2]
+            team_result["wu"] = the_data[3]
+            team_result["project_type"] = "fah"
+            return team_result
+
+    raise Exception("Critical Error: EOF reaches without finding the team")
+
+
+def search_team_in_file_by_name_boinc(file_path, name):
     file_to_read = open(file_path, "r")
     team_result = TeamStat()
     to_return = False
     storing = False
 
-    a = file_to_read.read()
-    a = a.split("\\n")
-
-    for line in a:
+    for line in file_to_read.readlines():
         tag = fast_search_tag(line)
         if tag == "team":
             storing = True
         elif tag == "/team" and to_return:
+            team_result["project_type"] = "boinc"
             return team_result
         elif tag == "name":
             team_result[tag] = fast_search_value(line)
@@ -147,3 +167,4 @@ def db_tables_data_extraction(file_path, name):
             record_table["total_credit"] = value
             break
     return record_table
+
