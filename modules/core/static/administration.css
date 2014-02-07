@@ -4,6 +4,19 @@ body {
     font-family: Helvetica Narrow, sans-serif;
 }
 
+.message
+{
+height:20px;
+width:100%;
+color:white;
+position:fixed;
+text-align:center;
+bottom:0px;
+background-image:linear-gradient(black, #222);
+text-decoration: none;
+font-family: Helvetica Narrow, sans-serif;
+}
+
 .top_menu
 {
 height:50px;
@@ -48,6 +61,7 @@ margin-right:20px;
 float:left;
 height:50px;
 }
+
 
 
 .log_table

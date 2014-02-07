@@ -10,7 +10,6 @@ def log_something_harvester(module_name, type_of_error, message):
 
 def get_all_log_harvester(limit=-1, parameter_ajax=None):
     order = -1
-    print(str(parameter_ajax))
     request = db["ASFBAH"]["logging"]["harvester"]
     if parameter_ajax:
         arguments = {}

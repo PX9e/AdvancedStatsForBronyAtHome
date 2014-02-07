@@ -6,47 +6,165 @@
 
 </head>
 <body>
+<script type=text/javascript src="{{url_for('static', filename='jquery-1.10.2.min.js') }}"></script>
+<script>
+jQuery.ajaxSettings.traditional = true;
+var a = {{list_function | safe}}
+
+function update_fields(name,value)
+{
+    var row = document.getElementById(name + "-row");
+    var rowB = document.getElementById(name + "-header-row");
+    for(var i=0; i<a.length; i++)
+    {
+        if(a[i][0]==value)
+        {
+            for(var u = row.cells.length-1; u>-1 ; u--)
+            {
+                if(!get_name_cell(row.cells[u].innerHTML).match("^send$|^delete$|^name$|^harvesting_function$"))
+                {
+                    row.deleteCell(u);
+                }
+            }
+            for(var z=0; z< a[i][1].length; z++)
+            {
+                var x = row.insertCell(row.cells.length-1);
+                x.innerHTML="<input type='text' name=" +  a[i][1][z] + " value=''>";
+            }
+
+            for(var u = rowB.cells.length-1; u>-1 ; u--)
+            {
+                if(!rowB.cells[u].innerHTML.match("^name$|^harvesting_function$"))
+                {
+                    rowB.deleteCell(u);
+                }
+            }
+            for(var z=0; z< a[i][1].length; z++)
+            {
+                var newth = document.createElement('th');
+                rowB.appendChild(newth);
+                newth.innerHTML = a[i][1][z];
+            }
+        }
+    }
+    if(name=="new")
+    {
+        var newth = document.createElement('th');
+        rowB.appendChild(newth);
+        newth.innerHTML = "Add";
+    }
+}
+
+function send_project(name){
+
+    popup("try");
+    if(name=="new")
+    {
+        var my_select = document.getElementById(name + "-select");
+        var parameters = new Object();
+        parameters["id"] = -1
+        if((my_select.value !="")&&(!!my_select.value))
+        {
+            parameters["harvesting_function"] = my_select.value
+            var my_form = document.getElementById(name);
+            for(i=0; i< my_form.elements.length; i++)
+            {
+                if(my_form.elements[i].type=="text")
+                {
+                    parameters[my_form.elements[i].name] = my_form.elements[i].value;
+                }
+            }
+            alert(parameters)
+            $.getJSON("/harvester/admin/projectoperation", parameters,
+            function(feedback){ $('div.log_table tr:not(:first)').remove();
+            $.each(feedback.reverse(), function(i, field){
+                     $('div.log_table tr:first').after("<tr><td> " + field.datetime + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
+
+                     if(i==NbRow)
+                     {
+                        last_date = field.datetime;
+                     }
+                 }
+                );
+                })
+        }
+    }
+
+
+}
+
+function popup(text)
+{
+    var my_div = document.createElement('div');
+    my_div.innerHTML = text
+    document.getElementsByTagName('body')[0].appendChild(my_div);
+    my_div.className = 'message';
+    setInterval(function(){my_div.remove()},4000);
+
+}
+
+function get_name_cell(innerHTML){
+    var temp = innerHTML.substring(innerHTML.indexOf("name=")+6);
+    return temp.substring(0,temp.indexOf("\""));
+}
+</script>
 <div class=top_menu>
 <ul>
     <li><h3>Harvester Admin Panel</h3></li>
     <li><p></p><a href="/harvester">Harvester logs</a><p></p></li>
 </ul>
 </div>
-
-
 <div class=log_table>
-<form name="table_options">
-
 <h4>Projects:</h4>
-<table>
+{% for project in projects%}
+ <form id="{{project['_id']}}">
+    <table>
     <tr>
-       <th>Name</th>
-       <th>Url</th>
-       <th>Frequency</th>
-       <th>Representation</th>
-   </tr>
-    {% for project in projects%}
-     <tr id="{{project['_id']}}">
-<td><input type="text" name="option1" value="{{project['name']}}"></td>
-<td><input type="text" name="option2" value="{{project['url']}}"></td>
-<td><input type="text" name="option3" value="{{project['frequency']}}"></td>
-<td><input type="text" name="option4" value="{{project['representation']}}"></td>
-<td><input onclick="" type="button" name="delete" value="Delete"></td>
-<td><input onclick="alert({{project['_id']}})" type="button" name="send" value="Send"></td>
-    </tr>
-    {% endfor %}
-    <tr>
-<td><input type="text" name="option1" value=""></td>
-<td><input type="text" name="option2" value=""></td>
-<td><input type="text" name="option3" value=""></td>
-<td><input type="text" name="option4" value=""></td>
-<td><input onclick="" type="button" name="delete" value="Delete"></td>
-<td><input onclick="" type="button" name="send" value="Send"></td>
-    </tr>
+        {%for i in project%}
+       <th>{{i}}</th>
+       {%endfor%}
+        <th>Delete</th>
+        <th>Update</th>
 
+   </tr>
+     <tr>
+       {%for i in project%}
+            <td><input type="text" name="{{i}}" value="{{project[i]}}"></td>
+       {%endfor%}
+       <td><input onclick="" type="button" name="delete" value="Delete"></td>
+
+       <td><input onclick="alert({{project['_id']}}.option1.value);" type="button" name="send" value="Send"></td>
+    </tr>
 </table>
-    </form>
+</form>
+    {% endfor %}
+<form id="new">
+<table>
+    <tr id="new-header-row">
+
+
+    <th>name</th>
+    <th>harvesting_function</th>
+    <th>Add</th>
+
+   </tr>
+    <tr id="new-row">
+        <td><input type="text" name="name" value=""></td>
+        <td>
+        <select id="new-select" onchange="update_fields('new', this.value);" name="harvesting_function" >
+            <option value="" disabled selected style="display:none;"> </option>
+            {% for z in list_function%}
+            <option value="{{z[0]}}">{{z[0]}}</option>
+            {% endfor %}
+        </select>
+        </td>
+        <td>
+            <input onclick="send_project('new');" type="button" name="send" value="Send">
+        </td>
+    </tr>
+</table>
+ </form>
 </div>
-<script> </script>
+
 </body>
 </html>

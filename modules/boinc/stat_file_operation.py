@@ -9,7 +9,7 @@ class ProjectConfiguration:
                 if not isinstance(frequency, int):
                     frequency = int(frequency)
             except ValueError:
-                frequency = None
+                frequency = 3600
 
         self.attributs = {"name": name, "url": url, "frequency": frequency, "representation": representation,
                           "last_time_harvested": last_time_harvested, "function": function_to_execute,
@@ -74,7 +74,7 @@ def search_team_in_file_by_name_fah(file_path, name):
     team_result = TeamStat()
     pattern = "\t" + name + "\t"
     for line in file_to_read.readlines():
-        oper = line.decode()
+        oper = line.decode('latin1')
         if oper.find(pattern) > -1:
             the_line = oper.strip("\n")
             the_data = the_line.split("\t")

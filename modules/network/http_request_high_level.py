@@ -6,6 +6,7 @@ from modules.utils.string_operation import (extract_file_type_from_url,
 from modules.utils.config import config
 import os
 
+
 def download_file(url_of_file, path_to_write_file=None):
     """
     Download a file

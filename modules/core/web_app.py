@@ -1,10 +1,14 @@
-from flask import Flask, jsonify, request
-from flask.templating import render_template
-from modules.database.boinc_mongo import (get_collection,
-                                          get_all_project)
-from modules.database.logging import (get_all_log_harvester,
-                                      log_something_harvester)
 import json
+
+from flask import Flask, request
+from flask.templating import render_template
+
+from modules.database.boinc_mongo import (get_collection,
+                                          get_all_project,
+                                          register_a_project)
+from modules.database.logging import (get_all_log_harvester)
+from modules.boinc.stat_file_operation import ProjectConfiguration
+from modules.core.harvesting_function import list_functions
 
 
 app = Flask(__name__)
@@ -25,20 +29,8 @@ def app_get_stats(project):
 
 @app.route('/harvester/admin')
 def harvester_admin():
-    project_final = []
-    for project in get_all_project():
-        if not "name" in project:
-            project["name"] = "ERROR: name invalid"
-        if not "url" in project:
-            project["url"] = "ERROR: url invalid"
-        if not "representation" in project:
-            project["representation"] = "ERROR: representation invalid"
-        if not "frequency" in project:
-            project["frequency"] = "ERROR: frequency invalid"
-        project["_id"] = "id" + str(project["_id"])
-        project_final.append(project)
-    print(project_final)
-    return render_template('harvester_admin_view.html', projects=project_final)
+    return render_template('harvester_admin_view.html', projects=get_all_project(),
+                           list_function=list_functions)
 
 
 @app.route('/harvester')
@@ -55,8 +47,19 @@ def harvester_main():
 
 @app.route('/harvester/admin/projectoperation')
 def ajax_projext_operation():
-    parameter = request.args
-    return True
+    parameter_ajax = request.args
+    if "id" in parameter_ajax:
+        if parameter_ajax["id"].startswith("id"):
+            parameter_ajax = parameter_ajax[2:]
+        if parameter_ajax["id"] == "-1":
+            new_project = ProjectConfiguration()
+            for parameter in parameter_ajax:
+                if parameter != "id":
+                    new_project[parameter] = parameter_ajax[parameter]
+            register_a_project(new_project)
+        else:
+            o = 0
+
 
 @app.route('/harvester/log')
 def get_harvesting_log():

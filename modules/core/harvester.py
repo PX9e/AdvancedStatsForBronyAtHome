@@ -1,6 +1,6 @@
 from threading import Timer
 from multiprocessing.pool import Pool
-
+from importlib import import_module
 from modules.utils.config import config
 
 from modules.database.logging import log_something_harvester
@@ -21,17 +21,19 @@ class Harvester(object, metaclass=Singleton):
     def __init__(self):
 
         projects_from_mongo = get_all_project()
+
         self._projects = []
+
         for project in projects_from_mongo:
             if not "name" in project or not "url" in project:
                 log_something_harvester("HARVESTER", "TYPE_ERROR",
                                         "A project without name or url in database, skipped ...")
             else:
                 if not project["frequency"]:
-                    project["frequency"] = 6000
-                    project["ETA"] = 6000
+                    project["frequency"] = 3600
+                    project["ETA"] = 0
                 else:
-                    project["ETA"] = project["frequency"]
+                    project["ETA"] = 0
                 self._projects.append(project)
 
         self.interval = 60
@@ -48,8 +50,8 @@ class Harvester(object, metaclass=Singleton):
             else:
                 if not project["name"] in self._projects:
                     if not project["frequency"]:
-                        project["frequency"] = 6000
-                        project["ETA"] = 6000
+                        project["frequency"] = 3600
+                        project["ETA"] = 3600
                     else:
                         project["ETA"] = project["frequency"]
                     self._projects.append(project)
@@ -57,17 +59,20 @@ class Harvester(object, metaclass=Singleton):
     def check_state_timer(self):
         self.refresh = Timer(self.interval, self.check_state_timer)
         self.refresh.start()
-        try:
-            for project in self._projects:
-                project["ETA"] -= self.interval
-                if project["ETA"] <= 0:
-                    project["ETA"] = project["frequency"]
-                    parameters = ()
-                    for arg in project["function"].__code__.co_varnames:
-                        parameters += (project[arg])
-                    self.my_pool_of_processes.starmap(project["function"], parameters)
-        except Exception as e:
-            log_something_harvester("Harvester", "TYPE_ERROR", repr(e))
+        #try:
+        for project in self._projects:
+            project["ETA"] -= self.interval
+            if project["ETA"] <= 0:
+                project["ETA"] = project["frequency"]
+                parameters = ()
+                function_to_run = getattr(import_module("modules.core.harvesting_function"),
+                                          project["harvesting_function"])
+                variables_for_process = function_to_run.__code__.co_varnames[:function_to_run.__code__.co_argcount]
+                for arg in variables_for_process:
+                    parameters += ((project[arg],),)
+                self.my_pool_of_processes.starmap(function_to_run, parameters)
+        #except Exception as e:
+        #    log_something_harvester("Harvester", "TYPE_ERROR", repr(e))
         self.update_configuration()
 
     def stop(self):
