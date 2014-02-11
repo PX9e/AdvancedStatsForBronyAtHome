@@ -5,7 +5,9 @@ from flask.templating import render_template
 
 from modules.database.boinc_mongo import (get_collection,
                                           get_all_project,
-                                          register_a_project)
+                                          register_a_project,
+                                          get_projects_custom,
+                                          update_a_project)
 from modules.database.logging import (get_all_log_harvester)
 from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
@@ -29,7 +31,9 @@ def app_get_stats(project):
 
 @app.route('/harvester/admin')
 def harvester_admin():
-    return render_template('harvester_admin_view.html', projects=get_all_project(),
+    projects_to_print = get_all_project()[:]
+
+    return render_template('harvester_admin_view.html', projects=projects_to_print,
                            list_function=list_functions)
 
 
@@ -45,20 +49,44 @@ def harvester_main():
     return render_template('harvester_main_view.html', logs=list_log)
 
 
-@app.route('/harvester/admin/projectoperation')
-def ajax_projext_operation():
+@app.route('/harvester/admin/projectdeletion')
+def ajax_project_operation_deletion():
     parameter_ajax = request.args
     if "id" in parameter_ajax:
         if parameter_ajax["id"].startswith("id"):
             parameter_ajax = parameter_ajax[2:]
+
+
+    else:
+        return "Complete chaos, no Id !"
+
+
+@app.route('/harvester/admin/projectoperation')
+def ajax_project_operation_addition():
+    parameter_ajax = request.args
+    new_project = ProjectConfiguration()
+    if "id" in parameter_ajax:
+        if parameter_ajax["id"].startswith("id"):
+            parameter_ajax = parameter_ajax[2:]
         if parameter_ajax["id"] == "-1":
-            new_project = ProjectConfiguration()
-            for parameter in parameter_ajax:
-                if parameter != "id":
-                    new_project[parameter] = parameter_ajax[parameter]
-            register_a_project(new_project)
+            if get_projects_custom(name=parameter_ajax["name"]).count() == 0:
+                for parameter in parameter_ajax:
+                    if parameter != "id":
+                        new_project[parameter] = parameter_ajax[parameter]
+                register_a_project(new_project)
+            else:
+                return "A project already have this name !"
         else:
-            o = 0
+            if get_projects_custom(_id=parameter_ajax["id"]).count() == 0:
+                return "Complete chaos, Id is not matching !"
+            else:
+                update_dict = {}
+                for parameter in parameter_ajax:
+                    if parameter != "id":
+                        update_dict[parameter] = parameter_ajax[parameter]
+                update_a_project({'_id': parameter_ajax['id']}, update_dict)
+    else:
+        return "Complete chaos, no Id ! "
 
 
 @app.route('/harvester/log')

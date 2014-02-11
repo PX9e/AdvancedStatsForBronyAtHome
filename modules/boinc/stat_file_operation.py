@@ -12,7 +12,7 @@ class ProjectConfiguration:
                 frequency = 3600
 
         self.attributs = {"name": name, "url": url, "frequency": frequency, "representation": representation,
-                          "last_time_harvested": last_time_harvested, "function": function_to_execute,
+                          "last_time_harvested": last_time_harvested, "harvesting_function": function_to_execute,
                           "type": type_project}
 
     def __str__(self):
