@@ -38,7 +38,6 @@ def remove_a_project(id):
     if id:
         if not isinstance(id, ObjectId):
             id = ObjectId(id)
-
         db["ASFBAH"]["project_list"].remove({'_id': id})
 
 

@@ -28,6 +28,7 @@ def get_all_log_harvester(limit=-1, parameter_ajax=None):
                 regx = re.compile("^" + parameter_ajax["module"] + ".*", re.IGNORECASE)
 
                 arguments["module"] = regx
+        print(arguments)
         request = request.find(arguments)
     else:
         request = request.find({})

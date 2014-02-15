@@ -4,8 +4,7 @@ from importlib import import_module
 from modules.utils.config import config
 
 from modules.database.logging import log_something_harvester
-from modules.database.boinc_mongo import (get_all_project
-                                          )
+from modules.database.boinc_mongo import get_all_project
 
 
 class Singleton(type):
@@ -53,26 +52,27 @@ class Harvester(object, metaclass=Singleton):
                         project["frequency"] = 3600
                         project["ETA"] = 3600
                     else:
-                        project["ETA"] = project["frequency"]
+                        project["ETA"] = int(project["frequency"])
                     self._projects.append(project)
 
     def check_state_timer(self):
         self.refresh = Timer(self.interval, self.check_state_timer)
         self.refresh.start()
-        #try:
-        for project in self._projects:
-            project["ETA"] -= self.interval
-            if project["ETA"] <= 0:
-                project["ETA"] = project["frequency"]
-                parameters = ()
-                function_to_run = getattr(import_module("modules.core.harvesting_function"),
-                                          project["harvesting_function"])
-                variables_for_process = function_to_run.__code__.co_varnames[:function_to_run.__code__.co_argcount]
-                for arg in variables_for_process:
-                    parameters += ((project[arg],),)
-                self.my_pool_of_processes.starmap(function_to_run, parameters)
-        #except Exception as e:
-        #    log_something_harvester("Harvester", "TYPE_ERROR", repr(e))
+        try:
+            for project in self._projects:
+                project["ETA"] -= self.interval
+                if project["ETA"] <= 0:
+                    project["ETA"] = int(project["frequency"])
+                    parameters = ()
+                    function_to_run = getattr(import_module("modules.core.harvesting_function"),
+                                              project["harvesting_function"])
+                    variables_for_process = function_to_run.__code__.co_varnames[:function_to_run.__code__.co_argcount]
+                    for arg in variables_for_process:
+                        parameters += (project[arg],)
+                    parameters = ((parameters,))
+                    self.my_pool_of_processes.starmap_async(function_to_run, parameters)
+        except Exception as e:
+            log_something_harvester("Harvester", "TYPE_ERROR", repr(e))
         self.update_configuration()
 
     def stop(self):

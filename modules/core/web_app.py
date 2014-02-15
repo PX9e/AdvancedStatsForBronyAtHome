@@ -7,7 +7,8 @@ from modules.database.boinc_mongo import (get_collection,
                                           get_all_project,
                                           register_a_project,
                                           get_projects_custom,
-                                          update_a_project)
+                                          update_a_project,
+                                          remove_a_project)
 from modules.database.logging import (get_all_log_harvester)
 from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
@@ -28,6 +29,15 @@ def app_get_stats(project):
         res += str(i)
     return res
 
+
+@app.route('/harvester/projects')
+def harvester_projects():
+    projects = get_all_project()[:]
+    projects_to_send =[]
+    for i in projects:
+        i["_id"] = str(i["_id"])
+        projects_to_send.append(i)
+    return json.dumps(projects_to_send)
 
 @app.route('/harvester/admin')
 def harvester_admin():
@@ -54,11 +64,11 @@ def ajax_project_operation_deletion():
     parameter_ajax = request.args
     if "id" in parameter_ajax:
         if parameter_ajax["id"].startswith("id"):
-            parameter_ajax = parameter_ajax[2:]
-
-
+            parameter_ajax["id"] = parameter_ajax["id"][2:]
+        remove_a_project(parameter_ajax["id"])
+        return json.dumps("The project has been deleted")
     else:
-        return "Complete chaos, no Id !"
+        return json.dumps("Complete chaos, no Id !")
 
 
 @app.route('/harvester/admin/projectoperation')
@@ -74,19 +84,21 @@ def ajax_project_operation_addition():
                     if parameter != "id":
                         new_project[parameter] = parameter_ajax[parameter]
                 register_a_project(new_project)
+                return json.dumps("The project has been correctly added to the database")
             else:
-                return "A project already have this name !"
+                return json.dumps("A project already have this name !")
         else:
             if get_projects_custom(_id=parameter_ajax["id"]).count() == 0:
-                return "Complete chaos, Id is not matching !"
+                return json.dumps("Complete chaos, Id is not matching !")
             else:
                 update_dict = {}
                 for parameter in parameter_ajax:
                     if parameter != "id":
                         update_dict[parameter] = parameter_ajax[parameter]
                 update_a_project({'_id': parameter_ajax['id']}, update_dict)
+                return json.dumps("Update of the project is a success")
     else:
-        return "Complete chaos, no Id ! "
+        return json.dumps("Complete chaos, no Id ! ")
 
 
 @app.route('/harvester/log')

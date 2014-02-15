@@ -118,20 +118,14 @@ function refresh(){
 
                  $('div.log_table tr:first').after("<tr><td> " + field.datetime + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
 
-                 if(i==NbRow)
-                 {
-                    last_date = field.datetime;
-                 }
+                 last_date = field.datetime;
+
              }
          );
          })
 }
 
 function get_new_logs(){
-
-    var table_d = "";
-    var feedback;
-
     $.getJSON("/harvester/log",{datetime: last_date, type:types_to_print, module:[], limit:NbRow, module:table_options.module.value},
       function(feedback){ $.each(feedback.reverse(), function(i, field){
 
@@ -139,10 +133,8 @@ function get_new_logs(){
 
                  $('div.log_table tr:first').after("<tr><td> " + field.datetime + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
 
-                 if(i==NbRow)
-                 {
-                    last_date = field.datetime;
-                 }
+
+                 last_date = field.datetime;
              }
          );
 

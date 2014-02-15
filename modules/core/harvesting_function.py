@@ -49,24 +49,24 @@ def harvest_boinc_project(name, url, last_time_harvested):
 
 
 def harvest_folding_at_home_project(name="Folding@Home"):
-    #try:
-    log_something_harvester(name, "TYPE_START", "STARTING ... ")
-    start = time()
-    log_something_harvester(name, "TYPE_INFO", "Downloading daily_team_summary.txt.bz2... ")
-    file_to_extract = download_file("http://fah-web.stanford.edu/daily_team_summary.txt.bz2",
-                                    config["ASFBAH"]["CFG_SHARED_TMP_PATH"] + name + str(path.sep) +
-                                    "daily_team_summary.txt.bz2")
-    log_something_harvester(name, "TYPE_INFO", "Extracting ... ")
-    file_pr = decompression(file_to_extract, False)
-    log_something_harvester(name, "TYPE_INFO", "Looking for " + config["ASFBAH"]["TEAM"] + " data ... ")
-    team = search_team_in_file_by_name_fah(file_pr, config["ASFBAH"]["TEAM"])
-    log_something_harvester(name, "TYPE_INFO", "Injecting into database ... ")
-    register_team_state_in_database(team, name)
-    elapsed = (time() - start)
-    log_something_harvester(name, "TYPE_COMPLETE", "Complete in " + str(round(elapsed, 3)) + " sec")
+    try:
+        log_something_harvester(name, "TYPE_START", "STARTING ... ")
+        start = time()
+        log_something_harvester(name, "TYPE_INFO", "Downloading daily_team_summary.txt.bz2... ")
+        file_to_extract = download_file("http://fah-web.stanford.edu/daily_team_summary.txt.bz2",
+                                        config["ASFBAH"]["CFG_SHARED_TMP_PATH"] + name + str(path.sep) +
+                                        "daily_team_summary.txt.bz2")
+        log_something_harvester(name, "TYPE_INFO", "Extracting ... ")
+        file_pr = decompression(file_to_extract, False)
+        log_something_harvester(name, "TYPE_INFO", "Looking for " + config["ASFBAH"]["TEAM"] + " data ... ")
+        team = search_team_in_file_by_name_fah(file_pr, config["ASFBAH"]["TEAM"])
+        log_something_harvester(name, "TYPE_INFO", "Injecting into database ... ")
+        register_team_state_in_database(team, name)
+        elapsed = (time() - start)
+        log_something_harvester(name, "TYPE_COMPLETE", "Complete in " + str(round(elapsed, 3)) + " sec")
 
-    #except Exception as e:
-    #    log_something_harvester(name, "TYPE_ERROR", repr(e))
+    except Exception as e:
+        log_something_harvester(name, "TYPE_ERROR", repr(e))
 
 
 list_functions = [["harvest_boinc_project", ["representation", "url", "frequency"]],

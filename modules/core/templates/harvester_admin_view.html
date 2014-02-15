@@ -71,6 +71,18 @@ function update_fields(name,value)
     }
 }
 
+
+function update_list_project()
+{
+     $.getJSON("/harvester/projects", function(feedback){popup(feedback)});
+}
+
+function delete_project(id){
+            var parameters = Object();
+            parameters['id'] = id;
+            $.getJSON("/harvester/admin/projectdeletion", parameters, function(feedback){popup(feedback)});
+}
+
 function send_project(name){
 
         var my_select = document.getElementById(name + "-select");
@@ -108,7 +120,7 @@ function send_project(name){
                 popup("Modifying project ...");
             }
 
-            $.getJSON("/harvester/admin/projectoperation", parameters, function(feedback){alert(feedback)});
+            $.getJSON("/harvester/admin/projectoperation", parameters, function(feedback){popup(feedback)});
         }
 }
 
@@ -125,6 +137,7 @@ function get_name_cell(innerHTML){
     var temp = innerHTML.substring(innerHTML.indexOf("name=")+6);
     return temp.substring(0,temp.indexOf("\""));
 }
+update_list_project()
 </script>
 <div class=top_menu>
 <ul>
@@ -155,20 +168,23 @@ function get_name_cell(innerHTML){
        <td><input type="text" name="name" value="{{project['name']}}"></td>
        <td>
        <select id="{{project['_id']}}-select" onchange="update_fields('{{project['_id']}}', this.value);" name="harvesting_function" >
-            <option value="" disabled selected style="display:none;"> {{project['harvesting_function']}}</option>
            {% for z in list_function%}
-            <option value="{{z[0]}}">{{z[0]}}</option>
-            {% endfor %}
+            {% if z[0]  == project['harvesting_function'] %}
+           <option selected value="{{z[0]}}">{{z[0]}}</option>
+            {% else %}
+           <option value="{{z[0]}}">{{z[0]}}</option>
+            {% endif %}
+           {% endfor %}
        </select>
        </td>
        {% for element in list_function %}
             {% if element[0] == project["harvesting_function"] %}
                 {% for parameter in element[1]%}
-                    <td><input type="text" name="name" value="{{project[parameter]}}"></td>
+                    <td><input type="text" name="{{parameter}}" value="{{project[parameter]}}"></td>
                 {% endfor %}
             {% endif %}
         {% endfor %}
-        <td><input onclick="" type="button" name="delete" value="Delete"></td>
+        <td><input onclick="delete_project('{{project['_id']}}')" type="button" name="delete" value="Delete"></td>
 
        <td><input onclick="send_project('{{project['_id']}}');" type="button" name="send" value="Send"></td>
     </tr>
