@@ -8,7 +8,9 @@ from modules.database.boinc_mongo import (get_collection,
                                           register_a_project,
                                           get_projects_custom,
                                           update_a_project,
-                                          remove_a_project)
+                                          remove_a_project,
+                                          get_server_date,
+                                          get_all_project_by_date)
 from modules.database.logging import (get_all_log_harvester)
 from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
@@ -31,13 +33,26 @@ def app_get_stats(project):
 
 @app.route('/harvester/projects')
 def harvester_projects():
-    projects = get_all_project()[:]
+    parameter_ajax = request.args
+    if "date" in parameter_ajax:
+        projects = get_all_project_by_date(parameter_ajax["date"])
+    else:
+        projects = get_all_project()[:]
     projects_to_send = []
     for i in projects:
         i["_id"] = str(i["_id"])
         projects_to_send.append(i)
     return json.dumps(projects_to_send)
 
+
+
+@app.route('/harvester/server_time')
+def harvester_server_time():
+    parameter_ajax = request.args
+    type_date = None
+    if "type_date" in parameter_ajax:
+        type_date = parameter_ajax["type_date"]
+    return json.dumps(get_server_date(type_date))
 
 @app.route('/harvester/admin')
 def harvester_admin():
