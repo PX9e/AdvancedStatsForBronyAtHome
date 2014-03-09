@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from modules.database.mongodb_operations_low import db
 from pymongo.son_manipulator import ObjectId
 
@@ -18,6 +18,7 @@ def get_collection(project_name):
 
 
 def register_a_project(project_configuration_to_save):
+    project_configuration_to_save.attributs["date_update"] = time.time()
     db["ASFBAH"]["project_list"].insert(project_configuration_to_save.attributs)
 
 
@@ -31,7 +32,7 @@ def update_a_project(keys, updates):
         if "_id" in updates:
             if not isinstance(updates['_id'], ObjectId):
                 updates['_id'] = ObjectId(updates['_id'])
-
+        updates["date_update"] = time.time()
         db["ASFBAH"]["project_list"].update(keys, {'$set': updates})
 
 
@@ -65,12 +66,21 @@ def get_projects_custom(arguments=None, **kwargs):
     return db["ASFBAH"]["project_list"].find(processed_arguments)
 
 
+def get_server_date(type_date=None):
+    if type_date == "epoch":
+        return {"date": time.time()}
+    else:
+        return {"date": str(time.time())}
+
+
 def get_all_project():
     return db["ASFBAH"]["project_list"].find({})
 
 
-def get_all_project_by_date(date):
-    return db["ASFBAH"]["project_list"].find({'$gt': datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f")})
+def get_all_project_by_date(date=None):
+    if not date or date == 0:
+        return get_all_project()
+    return db["ASFBAH"]["project_list"].find({'$gt': float(date)})
 
 
 def update_projects_harvest_time(name):
@@ -89,17 +99,3 @@ def get_projects_precise(name=None, url=None, representation=None, frequency=Non
     if representation:
         request_parameter["representation"] = {representation}
     return db["ASFBAH"]["project_list"].find(request_parameter)
-
-
-def ajax_project_operation_backend(ajax_parameter):
-    if "operation" in ajax_parameter:
-        if ajax_parameter["operation"] == "modification":
-            return True
-        elif ajax_parameter["operation"] == "insertion":
-            return True
-        elif ajax_parameter["operation"] == "deletion":
-            return True
-        else:
-            return False
-    else:
-        return False
