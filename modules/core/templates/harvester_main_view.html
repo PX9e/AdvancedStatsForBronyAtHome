@@ -116,7 +116,7 @@ function refresh(){
       function(feedback){ $('div.log_table tr:not(:first)').remove();
       $.each(feedback.reverse(), function(i, field){
 
-                 $('div.log_table tr:first').after("<tr><td> " + field.datetime + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
+                 $('div.log_table tr:first').after("<tr><td> " + Date(field.datetime * 1000) + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
 
                  last_date = field.datetime;
 
@@ -128,12 +128,8 @@ function refresh(){
 function get_new_logs(){
     $.getJSON("/harvester/log",{datetime: last_date, type:types_to_print, module:[], limit:NbRow, module:table_options.module.value},
       function(feedback){ $.each(feedback.reverse(), function(i, field){
-
                  $('div.log_table tr:last').remove();
-
-                 $('div.log_table tr:first').after("<tr><td> " + field.datetime + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
-
-
+                 $('div.log_table tr:first').after("<tr><td> " + Date(field.datetime * 1000) + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
                  last_date = field.datetime;
              }
          );

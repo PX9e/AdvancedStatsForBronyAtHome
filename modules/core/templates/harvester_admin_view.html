@@ -86,7 +86,8 @@
 </div>
 <script>
 jQuery.ajaxSettings.traditional = true;
-var a = {{list_function | safe}}
+var a = {{list_function | safe}};
+var last_refresh_date = "";
 
 function update_fields(name,value)
 {
@@ -154,7 +155,7 @@ function update_fields(name,value)
 function update_list_project()
 {
 
-     $.getJSON("/harvester/projects",null,function(feedback){
+     $.getJSON("/harvester/projects",undefined,function(feedback){
            var my_list_of_project = feedback;
            var my_list_of_project_b = new Array();
            var table = document.getElementById("log_table");
@@ -216,10 +217,10 @@ function update_list_project()
                     }
                 }
            }
-
-
      });
-
+      $.getJSON("/harvester/server_time",undefined,function(feedback){
+      last_refresh_date = feedback.date;
+      });
 }
 
 function delete_project(id){
