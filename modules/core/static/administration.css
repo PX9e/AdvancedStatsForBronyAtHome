@@ -61,7 +61,7 @@ body {
     height:50px;
 }
 
-.log_table
+#log_table
 {
     box-shadow:0px 0px 10px #AAA;
     padding:20px;
@@ -72,14 +72,14 @@ body {
     width:90%;
 }
 
-.log_table table
+#log_table table
 {
     padding:20px;
 }
 
 
 
-.log_table td
+#log_table td
 {
     text-align:center;
     padding-top:7px;
@@ -87,7 +87,7 @@ body {
     width:20%;
 }
 
-.log_table th
+#log_table th
 {
     text-align:center;
     padding-bottom:15px;

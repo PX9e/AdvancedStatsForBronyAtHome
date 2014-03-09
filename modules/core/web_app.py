@@ -13,7 +13,6 @@ from modules.database.logging import (get_all_log_harvester)
 from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
 
-
 app = Flask(__name__)
 
 
@@ -33,11 +32,12 @@ def app_get_stats(project):
 @app.route('/harvester/projects')
 def harvester_projects():
     projects = get_all_project()[:]
-    projects_to_send =[]
+    projects_to_send = []
     for i in projects:
         i["_id"] = str(i["_id"])
         projects_to_send.append(i)
     return json.dumps(projects_to_send)
+
 
 @app.route('/harvester/admin')
 def harvester_admin():

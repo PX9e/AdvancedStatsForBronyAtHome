@@ -2,7 +2,6 @@ from threading import Timer
 from multiprocessing.pool import Pool
 from importlib import import_module
 from modules.utils.config import config
-
 from modules.database.logging import log_something_harvester
 from modules.database.boinc_mongo import get_all_project
 
@@ -34,7 +33,6 @@ class Harvester(object, metaclass=Singleton):
                 else:
                     project["ETA"] = 0
                 self._projects.append(project)
-
         self.interval = 60
         self.my_pool_of_processes = Pool(int(config["ASFBAH"]["CPU_CORE_TO_USE_FOR_HARVESTING"]))
         self.refresh = None
@@ -57,6 +55,7 @@ class Harvester(object, metaclass=Singleton):
 
     def check_state_timer(self):
         self.refresh = Timer(self.interval, self.check_state_timer)
+
         self.refresh.start()
         try:
             for project in self._projects:

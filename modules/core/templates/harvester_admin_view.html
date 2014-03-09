@@ -7,149 +7,18 @@
 </head>
 <body>
 <script type=text/javascript src="{{url_for('static', filename='jquery-1.10.2.min.js') }}"></script>
-<script>
-jQuery.ajaxSettings.traditional = true;
-var a = {{list_function | safe}}
 
-function update_fields(name,value)
-{
-    var row = document.getElementById(name + "-row");
-    var rowB = document.getElementById(name + "-header-row");
-    for(var i=0; i<a.length; i++)
-    {
-        if(a[i][0]==value)
-        {
-            for(var u = row.cells.length-1; u>-1 ; u--)
-            {
-                if(!get_name_cell(row.cells[u].innerHTML).match("^send$|^delete$|^name$|^harvesting_function$"))
-                {
-                    row.deleteCell(u);
-                }
-            }
-            for(var z=0; z< a[i][1].length; z++)
-            {
-                if(name=="new")
-                {
-                    var x = row.insertCell(row.cells.length-1);
-                }
-                else
-                {
-                    var x = row.insertCell(row.cells.length-2);
-                }
-                x.innerHTML="<input type='text' name=" +  a[i][1][z] + " value=''>";
-            }
-
-            for(var u = rowB.cells.length-1; u>-1 ; u--)
-            {
-                if(!rowB.cells[u].innerHTML.match("^name$|^harvesting_function$"))
-                {
-                    rowB.deleteCell(u);
-                }
-            }
-            for(var z=0; z< a[i][1].length; z++)
-            {
-                var newth = document.createElement('th');
-                rowB.appendChild(newth);
-                newth.innerHTML = a[i][1][z];
-            }
-        }
-    }
-    if(name=="new")
-    {
-        var newth = document.createElement('th');
-        rowB.appendChild(newth);
-        newth.innerHTML = "Add";
-    }
-    else
-    {
-        var newth = document.createElement('th');
-        rowB.appendChild(newth);
-        newth.innerHTML = "Delete";
-        var newthb = document.createElement('th');
-        rowB.appendChild(newthb);
-        newthb.innerHTML = "Update";
-    }
-}
-
-
-function update_list_project()
-{
-     $.getJSON("/harvester/projects", function(feedback){popup(feedback)});
-}
-
-function delete_project(id){
-            var parameters = Object();
-            parameters['id'] = id;
-            $.getJSON("/harvester/admin/projectdeletion", parameters, function(feedback){popup(feedback)});
-}
-
-function send_project(name){
-
-        var my_select = document.getElementById(name + "-select");
-        var parameters = new Object();
-        if(name=="new")
-        {
-            parameters["id"] = -1;
-        }
-        else
-        {
-            parameters["id"] = name;
-        }
-        if((my_select.value !="")&&(!!my_select.value))
-        {
-            parameters["harvesting_function"] = my_select.value
-            var my_form = document.getElementById(name);
-            for(i=0; i< my_form.elements.length; i++)
-            {
-                if(my_form.elements[i].type=="text")
-                {
-                    if(my_form.elements[i].value == "")
-                    {
-                        popup("A field is empty, it is impossible to add a project without all the information...");
-                        return False;
-                    }
-                    parameters[my_form.elements[i].name] = my_form.elements[i].value;
-                }
-            }
-            if(name=="new")
-            {
-                popup("Adding a new project to the database...");
-            }
-            else
-            {
-                popup("Modifying project ...");
-            }
-
-            $.getJSON("/harvester/admin/projectoperation", parameters, function(feedback){popup(feedback)});
-        }
-}
-
-function popup(text)
-{
-    var my_div = document.createElement('div');
-    my_div.innerHTML = text
-    document.getElementsByTagName('body')[0].appendChild(my_div);
-    my_div.className = 'message';
-    setInterval(function(){my_div.remove()},4000);
-}
-
-function get_name_cell(innerHTML){
-    var temp = innerHTML.substring(innerHTML.indexOf("name=")+6);
-    return temp.substring(0,temp.indexOf("\""));
-}
-update_list_project()
-</script>
 <div class=top_menu>
 <ul>
     <li><h3>Harvester Admin Panel</h3></li>
-    <li><p></p><a href="/harvester">Harvester logs</a><p></p></li>
+    <li><p><a href="/harvester">Harvester logs</a></p></li>
 </ul>
 </div>
-<div class=log_table>
+<div id="log_table">
 <h4>Projects:</h4>
 {% for project in projects%}
 <form id="{{project['_id']}}">
-<table>
+<table id="project_table">
      <tr id="{{project['_id']}}-header-row">
 
         <th>name</th>
@@ -215,6 +84,212 @@ update_list_project()
 </table>
 </form>
 </div>
+<script>
+jQuery.ajaxSettings.traditional = true;
+var a = {{list_function | safe}}
 
+function update_fields(name,value)
+{
+    var row = document.getElementById(name + "-row");
+    var rowB = document.getElementById(name + "-header-row");
+    for(var i=0; i<a.length; i++)
+    {
+        if(a[i][0]==value)
+        {
+            for(var u = row.cells.length-1; u>-1 ; u--)
+            {
+                if(!get_name_cell(row.cells[u].innerHTML).match("^send$|^delete$|^name$|^harvesting_function$"))
+                {
+                    row.deleteCell(u);
+                }
+            }
+
+            for(var z=0; z< a[i][1].length; z++)
+            {
+                if(name=="new")
+                {
+                    var x = row.insertCell(row.cells.length-1);
+                }
+                else
+                {
+                    var x = row.insertCell(row.cells.length-2);
+                }
+                x.innerHTML="<input type='text' name=" +  a[i][1][z] + " value=''>";
+            }
+
+            for(var u = rowB.cells.length-1; u>-1 ; u--)
+            {
+                if(!rowB.cells[u].innerHTML.match("^name$|^harvesting_function$"))
+                {
+                    rowB.deleteCell(u);
+                }
+            }
+            for(var z=0; z< a[i][1].length; z++)
+            {
+                var newth = document.createElement('th');
+                rowB.appendChild(newth);
+                newth.innerHTML = a[i][1][z];
+            }
+        }
+    }
+    if(name=="new")
+    {
+        var newth = document.createElement('th');
+        rowB.appendChild(newth);
+        newth.innerHTML = "Add";
+    }
+    else
+    {
+        var newth = document.createElement('th');
+        rowB.appendChild(newth);
+        newth.innerHTML = "Delete";
+        var newthb = document.createElement('th');
+        rowB.appendChild(newthb);
+        newthb.innerHTML = "Update";
+    }
+    update_list_project();
+}
+
+
+function update_list_project()
+{
+
+     $.getJSON("/harvester/projects",null,function(feedback){
+           var my_list_of_project = feedback;
+           var my_list_of_project_b = new Array();
+           var table = document.getElementById("log_table");
+           table = table.getElementsByTagName("tr");
+           var tds;
+           var it_exists;
+           var id;
+           for(i in table)
+           {
+                if(table[i].id!=undefined)
+                {
+                    if(table[i].id.indexOf("new") == -1)
+                    {
+
+                        if(table[i].id.indexOf("header") == -1)
+                        {
+
+                            id = table[i].id.substring(0,table[i].id.indexOf("-row"));
+                            it_exists = false
+
+                            for(project_in_list in my_list_of_project)
+                            {
+                                if(my_list_of_project[project_in_list]._id == id)
+                                {
+                                    it_exists = true;
+                                    var form_to_change = document.getElementById(id);
+                                    form_to_change.name.value= my_list_of_project[project_in_list].name;
+                                    console.log(my_list_of_project[project_in_list].name)
+                                    break;
+                                }
+                            }
+
+                            if(it_exists == false)
+                            {
+                                var header_to_delete = document.getElementById(id);
+                                header_to_delete.remove();
+                            }
+
+
+                            var my_project = new Object();
+                            my_project['_id'] = table[i].id.substring(0,table[i].id.indexOf("-row"));
+                            tds = table[i].getElementsByTagName("td");
+
+
+                            for(element in tds)
+                            {
+                                    if(tds[element].innerHTML!=undefined)
+                                    {
+                                        for(var oo=0; oo<  tds[element].childNodes.length;oo++)
+                                        {
+                                            if(tds[element].childNodes[oo].value!=undefined)
+                                            {
+                                                my_project[tds[element].childNodes[oo].name] = tds[element].childNodes[oo].value;
+                                            }
+                                        }
+                                    }
+                            }
+                        }
+                    }
+                }
+           }
+
+
+     });
+
+}
+
+function delete_project(id){
+            var parameters = Object();
+            parameters['id'] = id;
+            $.getJSON("/harvester/admin/projectdeletion", parameters, function(feedback){popup(feedback)});
+            update_list_project();
+}
+
+function send_project(name){
+        var my_select = document.getElementById(name + "-select");
+        var parameters = new Object();
+        if(name=="new")
+        {
+            parameters["id"] = -1;
+        }
+        else
+        {
+            parameters["id"] = name;
+        }
+        if((my_select.value !="")&&(!!my_select.value))
+        {
+            parameters["harvesting_function"] = my_select.value
+            var my_form = document.getElementById(name);
+            for(i=0; i< my_form.elements.length; i++)
+            {
+                if(my_form.elements[i].type=="text")
+                {
+                    if(my_form.elements[i].value == "")
+                    {
+                        popup("A field is empty, it is impossible to add a project without all the information...");
+                        return False;
+                    }
+                    parameters[my_form.elements[i].name] = my_form.elements[i].value;
+                }
+            }
+            if(name=="new")
+            {
+                popup("Adding a new project to the database...");
+            }
+            else
+            {
+                popup("Modifying project ...");
+            }
+
+            $.getJSON("/harvester/admin/projectoperation", parameters, function(feedback){popup(feedback)});
+        }
+        update_list_project();
+}
+
+function popup(text)
+{
+    var my_div = document.createElement('div');
+    my_div.innerHTML = text
+    document.getElementsByTagName('body')[0].appendChild(my_div);
+    my_div.className = 'message';
+    setInterval(function(){my_div.remove()},4000);
+}
+
+function get_name_cell(innerHTML){
+    var temp = innerHTML.substring(innerHTML.indexOf("name=")+6);
+    return temp.substring(0,temp.indexOf("\""));
+}
+function refresh(){
+
+    setTimeout(function(){update_list_project(); refresh();}, 5000);
+
+}
+
+refresh();
+</script>
 </body>
 </html>

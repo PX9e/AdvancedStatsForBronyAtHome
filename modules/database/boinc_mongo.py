@@ -1,3 +1,4 @@
+import datetime
 from modules.database.mongodb_operations_low import db
 from pymongo.son_manipulator import ObjectId
 
@@ -34,11 +35,11 @@ def update_a_project(keys, updates):
         db["ASFBAH"]["project_list"].update(keys, {'$set': updates})
 
 
-def remove_a_project(id):
-    if id:
-        if not isinstance(id, ObjectId):
-            id = ObjectId(id)
-        db["ASFBAH"]["project_list"].remove({'_id': id})
+def remove_a_project(id_project):
+    if id_project:
+        if not isinstance(id_project, ObjectId):
+            id_project = ObjectId(id_project)
+        db["ASFBAH"]["project_list"].remove({'_id': id_project})
 
 
 def get_projects_custom(arguments=None, **kwargs):
@@ -66,6 +67,10 @@ def get_projects_custom(arguments=None, **kwargs):
 
 def get_all_project():
     return db["ASFBAH"]["project_list"].find({})
+
+
+def get_all_project_by_date(date):
+    return db["ASFBAH"]["project_list"].find({'$gt': datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f")})
 
 
 def update_projects_harvest_time(name):
@@ -98,5 +103,3 @@ def ajax_project_operation_backend(ajax_parameter):
             return False
     else:
         return False
-
-
