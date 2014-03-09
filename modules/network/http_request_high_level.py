@@ -1,3 +1,4 @@
+from time import sleep
 from urllib.request import urlopen, URLError
 from os.path import isfile
 from modules.utils.string_operation import (extract_file_type_from_url,
@@ -5,6 +6,7 @@ from modules.utils.string_operation import (extract_file_type_from_url,
                                             )
 from modules.utils.config import config
 import os
+
 
 def download_file(url_of_file, path_to_write_file=None):
     """
@@ -23,6 +25,7 @@ def download_file(url_of_file, path_to_write_file=None):
             connection = urlopen(url_of_file)
         except URLError:
             print("Connection try %s failed" % nbtry)
+            sleep(5)
             nbtry += 1
 
     if not connection:

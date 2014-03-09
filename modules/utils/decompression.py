@@ -1,22 +1,33 @@
-
-
 import gzip
+import bz2
 
 
-def decompression_gz(input_file, direct_output=False):
+compression_signature = {
+    b"\x1f\x8b\x08": gzip,
+    b"BZh": bz2,
+}
+
+
+def decompression(input_file, direct_output=False):
     """
     This function should extract our tarball,
     Exceptions are not handled !
     """
-    content_of_file = gzip.open(input_file, 'rb')
+    first_line = open(input_file, "rb").readline(3)
 
-    content_of_file = content_of_file.read()
+    file_to_extract = compression_signature[first_line].open(input_file, 'rb')
+
     if direct_output:
-        return content_of_file
+        result = file_to_extract.readlines()
+        file_to_extract.close()
+        return result
     else:
-        output_file_path = input_file[0:len(input_file)-3] + ".raw"
-        output_file = open(str(output_file_path), "w")
-        output_file.write(str(content_of_file))
+        output_file_path = input_file[0:len(input_file) - 3] + ".raw"
+        output_file = open(str(output_file_path), "wb")
+        output_file.write(file_to_extract.read())
+        file_to_extract.close()
         output_file.close()
 
         return output_file_path
+
+
