@@ -66,11 +66,9 @@ def get_projects_custom(arguments=None, **kwargs):
     return db["ASFBAH"]["project_list"].find(processed_arguments)
 
 
-def get_server_date(type_date=None):
-    if type_date == "epoch":
+def get_server_date():
         return {"date": time.time()}
-    else:
-        return {"date": str(time.time())}
+
 
 
 def get_all_project():
