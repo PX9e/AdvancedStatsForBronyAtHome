@@ -48,11 +48,7 @@ def harvester_projects():
 
 @app.route('/harvester/server_time')
 def harvester_server_time():
-    parameter_ajax = request.args
-    type_date = None
-    if "type_date" in parameter_ajax:
-        type_date = parameter_ajax["type_date"]
-    return json.dumps(get_server_date(type_date))
+    return json.dumps(get_server_date())
 
 @app.route('/harvester/admin')
 def harvester_admin():

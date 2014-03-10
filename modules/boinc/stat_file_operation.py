@@ -1,5 +1,4 @@
-import datetime
-
+import time
 
 class ProjectConfiguration:
     def __init__(self, name=None, url=None, frequency=None, representation=None, last_time_harvested=None,
@@ -33,7 +32,7 @@ class TeamStat:
         self.attributs = {"id": None, "type": None, "project_type": None, "name": None, "total_credit": None,
                           "expavg_credit": None,
                           "expavg_time": None, "founder": None, "create_time": None, "description": None,
-                          "country": None, "date": datetime.datetime.now()}
+                          "country": None, "date": time.time()}
 
     def __str__(self):
         return str(self.attributs)
@@ -50,7 +49,7 @@ class TeamStat:
     def get_stats(self):
         return {"name": self.attributs["name"], "total_credit": self.attributs["total_credit"],
                 "expavg_credit": self.attributs["expavg_credit"], "expavg_time": self.attributs["expavg_time"],
-                "date": datetime.datetime.now()}
+                "date": time.time()}
 
 
 class TeamsResume:
@@ -118,20 +117,24 @@ def fast_search_tag(line):
 
 def fast_search_value(line):
     """
-    Doesn't search the tag,just get the value in the line for the tag.
-    tag variable is here only to accelerate the process !
+    Doesn't search the tag,just get the value in the line.
     """
     return line[line.find(">") + 1:  line.rfind("<")]
 
 
 def db_dump_data_extraction(file_path, name):
+
+    #We open the downloaded file
     file_to_read = open(file_path + name)
-    result = []
+
+    result = {}
+
     record_table = {}
+
     for line in file_to_read.readlines():
         if line.find("<ta") > -1:
             if record_table:
-                result.append(record_table)
+                result[record_table["name"]] = record_table
                 record_table = {}
             name_table = fast_search_value(line)
             record_table["name"] = name_table
@@ -142,7 +145,7 @@ def db_dump_data_extraction(file_path, name):
             compression = fast_search_value(line)
             record_table["compression"] = compression
     if record_table:
-        result.append(record_table)
+        result[record_table["name"]] = record_table
     return result
 
 

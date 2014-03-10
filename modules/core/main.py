@@ -6,6 +6,6 @@ if __name__ == "__main__":
     sleep(5)
     import os
     print("Launching Harvester")
-    os.popen("python3 harvester_launch.py")
+    os.popen("python3 modules/core/harvester_launch.py")
     print("Launching Gunicorn")
-    os.popen("gunicorn  web_app:app -w 3 -b 0.0.0.0")
+    os.popen("gunicorn  --chdir modules/core/  web_app:app -w 3 -b 0.0.0.0")
