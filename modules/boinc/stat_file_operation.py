@@ -1,5 +1,4 @@
-import datetime
-
+import time
 
 class ProjectConfiguration:
     def __init__(self, name=None, url=None, frequency=None, representation=None, last_time_harvested=None,
@@ -33,7 +32,7 @@ class TeamStat:
         self.attributs = {"id": None, "type": None, "project_type": None, "name": None, "total_credit": None,
                           "expavg_credit": None,
                           "expavg_time": None, "founder": None, "create_time": None, "description": None,
-                          "country": None, "date": datetime.datetime.now()}
+                          "country": None, "date": time.time()}
 
     def __str__(self):
         return str(self.attributs)
@@ -50,7 +49,7 @@ class TeamStat:
     def get_stats(self):
         return {"name": self.attributs["name"], "total_credit": self.attributs["total_credit"],
                 "expavg_credit": self.attributs["expavg_credit"], "expavg_time": self.attributs["expavg_time"],
-                "date": datetime.datetime.now()}
+                "date": time.time()}
 
 
 class TeamsResume:
