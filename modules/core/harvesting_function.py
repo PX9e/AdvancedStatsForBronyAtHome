@@ -31,7 +31,7 @@ def harvest_boinc_project(name, url, last_time_harvested):
             log_something_harvester(name, "TYPE_INFO", "Processing db_dump.xml ... ")
             files_to_download = db_dump_data_extraction("", dump_xml)
             log_something_harvester(name, "TYPE_INFO", "Downloading team file... ")
-            file_to_extract = download_file(url + files_to_download["team"] + ".gz",
+            file_to_extract = download_file(url + files_to_download["team"]["file"] + ".gz",
                                             config["ASFBAH"]["CFG_SHARED_TMP_PATH"] + name + path.sep +
                                             "team.gz")
             log_something_harvester(name, "TYPE_INFO", "Extracting ... ")

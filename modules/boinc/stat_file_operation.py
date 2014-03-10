@@ -117,20 +117,24 @@ def fast_search_tag(line):
 
 def fast_search_value(line):
     """
-    Doesn't search the tag,just get the value in the line for the tag.
-    tag variable is here only to accelerate the process !
+    Doesn't search the tag,just get the value in the line.
     """
     return line[line.find(">") + 1:  line.rfind("<")]
 
 
 def db_dump_data_extraction(file_path, name):
+
+    #We open the downloaded file
     file_to_read = open(file_path + name)
-    result = []
+
+    result = {}
+
     record_table = {}
+
     for line in file_to_read.readlines():
         if line.find("<ta") > -1:
             if record_table:
-                result.append(record_table)
+                result[record_table["name"]] = record_table
                 record_table = {}
             name_table = fast_search_value(line)
             record_table["name"] = name_table
@@ -141,7 +145,7 @@ def db_dump_data_extraction(file_path, name):
             compression = fast_search_value(line)
             record_table["compression"] = compression
     if record_table:
-        result.append(record_table)
+        result[record_table["name"]] = record_table
     return result
 
 
