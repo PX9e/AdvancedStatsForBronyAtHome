@@ -71,4 +71,4 @@ def harvest_folding_at_home_project(name="Folding@Home"):
 
 
 list_functions = [["harvest_boinc_project", ["representation", "url", "frequency"]],
-                  ["harvest_folding_at_home_project", ["representation"]]]
+                  ["harvest_folding_at_home_project", ["representation", "frequency"]]]

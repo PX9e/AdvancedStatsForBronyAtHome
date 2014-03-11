@@ -119,7 +119,6 @@ def get_harvesting_log():
     try:
         for log in list_of_logs:
             log_proc = log
-            log_proc["datetime"] = str(log_proc["datetime"])
             del log_proc["_id"]
             res.append(log_proc)
         return json.dumps(res)

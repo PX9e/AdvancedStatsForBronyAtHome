@@ -277,11 +277,11 @@ function update_list_project()
                         var start = elem_to_modify.innerHTML.substring(0,elem_to_modify.innerHTML.indexOf('<form id="new">'))
                         elem_to_modify.innerHTML = start + my_new_code+newrow
 
-                    update_fields(my_list_of_project[or]._id,my_list_of_project[or].harvesting_function );
+                    update_fields(my_list_of_project[or]._id, my_list_of_project[or].harvesting_function);
                     var projet_to_complete = document.getElementById(my_list_of_project[or]._id);
                     for(var z= 0; z< a[mem][1].length; z++)
                     {
-                        form_to_change[a[mem][1][z]].value = my_list_of_project[project_in_list][a[mem][1][z]];
+                        projet_to_complete[a[mem][1][z]].value = my_list_of_project[or][a[mem][1][z]];
                     }
                     break;
                }
