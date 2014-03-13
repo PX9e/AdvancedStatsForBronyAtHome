@@ -21,7 +21,7 @@ class Harvester(object, metaclass=Singleton):
         projects_from_mongo = get_all_project()
 
         self._projects = []
-
+	self._projects_name = []
         for project in projects_from_mongo:
             if not "name" in project or not "url" in project:
                 log_something_harvester("HARVESTER", "TYPE_ERROR",
@@ -29,10 +29,12 @@ class Harvester(object, metaclass=Singleton):
             else:
                 if not project["frequency"]:
                     project["frequency"] = 3600
-                    project["ETA"] = 0
+                    project["ETA"] = 3600
                 else:
+		    project["frequency"] = int(project["frequency"])
                     project["ETA"] = 0
                 self._projects.append(project)
+		self._projects_name.append(project["name"]) 
         self.interval = 60
         self.my_pool_of_processes = Pool(int(config["ASFBAH"]["CPU_CORE_TO_USE_FOR_HARVESTING"]))
         self.refresh = None
@@ -45,13 +47,15 @@ class Harvester(object, metaclass=Singleton):
                 log_something_harvester("HARVESTER", "TYPE_ERROR",
                                         "A project without name or url in database, skipped ...")
             else:
-                if not project["name"] in self._projects:
+                if not project["name"] in self._projects_name:
                     if not project["frequency"]:
                         project["frequency"] = 3600
-                        project["ETA"] = 3600
+                        project["ETA"] = 0
                     else:
-                        project["ETA"] = int(project["frequency"])
+			project["frequency"] = int(project["frequency"])
+                        project["ETA"] = 0
                     self._projects.append(project)
+        	    self._projects_name.append(project["name"]) 
 
     def check_state_timer(self):
         self.refresh = Timer(self.interval, self.check_state_timer)
