@@ -1,8 +1,10 @@
-from datetime import datetime
+from functools import wraps
 from modules.database.mongodb_operations_low import db
 from pymongo.son_manipulator import ObjectId
-
+from modules.utils.config import config
+import uuid
 import time
+import flask
 
 
 def register_stats_state_in_database(team_state_to_insert, project_name):
@@ -67,8 +69,7 @@ def get_projects_custom(arguments=None, **kwargs):
 
 
 def get_server_date():
-        return {"date": time.time()}
-
+    return {"date": time.time()}
 
 
 def get_all_project():
@@ -97,3 +98,67 @@ def get_projects_precise(name=None, url=None, representation=None, frequency=Non
     if representation:
         request_parameter["representation"] = {representation}
     return db["ASFBAH"]["project_list"].find(request_parameter)
+
+
+def get_user(name):
+    user = db["ASFBAH"]["USERS"].find({"name": name})
+    if user.count() > 0:
+        return user[0]
+    else:
+        return None
+
+
+def identification(name, password):
+    import crypt
+
+    user = get_user(name)
+    if user:
+        if crypt.crypt(password, "$6$" + config["ASFBAH"]["SECRET_KEY"]) == user["password"]:
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
+def add_user(name, password):
+    import crypt
+
+    if not get_user(name):
+        user = {"name": name, "password": crypt.crypt(password, "$6$" + config["ASFBAH"]["SECRET_KEY"])}
+        db["ASFBAH"]["USERS"].insert(user)
+        return True
+    else:
+        return False
+
+def add_user_session_uuid(username):
+
+    session_id = uuid.uuid4()
+    my_user = get_user(username)
+    if my_user:
+        if "session_id" in my_user:
+            if time.time() - 3600 > int(my_user["session_id_time"]):
+                db["ASFBAH"]["project_list"].update({"name": username}, {"$set": {"session_id": str(session_id)}})
+                return session_id
+            else:
+                return my_user["session_id"]
+        else:
+            db["ASFBAH"]["project_list"].update({"name": username}, {"$set": {"session_id": str(session_id)}})
+            db["ASFBAH"]["project_list"].update({"name": username}, {"$set": {"session_id_time": time.time()}})
+            return session_id
+    else:
+        return False
+
+def must_be_login(f):
+
+    def test_log():
+        from flask import Response
+        my_response = Response()
+        if "uuid" in my_response.cookies:
+            f()
+        else:
+            from modules.core.web_app import login
+            login()
+
+
+    return test_log

@@ -1,9 +1,10 @@
 import json
 
-from flask import Flask, request
+from flask import Flask, request, Response
 from flask.templating import render_template
 
 from modules.database.boinc_mongo import (get_collection,
+                                          must_be_login,
                                           get_all_project,
                                           register_a_project,
                                           get_projects_custom,
@@ -51,6 +52,7 @@ def harvester_server_time():
     return json.dumps(get_server_date())
 
 @app.route('/harvester/admin')
+@must_be_login
 def harvester_admin():
     projects_to_print = get_all_project()[:]
 
@@ -125,6 +127,10 @@ def get_harvesting_log():
     except Exception as e:
         return str(e)
 
+
+@app.route('/harvester/login'):
+def login():
+    
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
