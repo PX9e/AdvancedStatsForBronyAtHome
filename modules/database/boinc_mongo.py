@@ -1,10 +1,9 @@
-from functools import wraps
 from modules.database.mongodb_operations_low import db
 from pymongo.son_manipulator import ObjectId
 from modules.utils.config import config
 import uuid
 import time
-import flask
+from flask import request
 
 
 def register_stats_state_in_database(team_state_to_insert, project_name):
@@ -108,6 +107,14 @@ def get_user(name):
         return None
 
 
+def get_user_by_session_id(uuid):
+    user = db["ASFBAH"]["USERS"].find({"session_id": uuid})
+    if user.count() > 0:
+        return user[0]
+    else:
+        return None
+
+
 def identification(name, password):
     import crypt
 
@@ -131,34 +138,47 @@ def add_user(name, password):
     else:
         return False
 
-def add_user_session_uuid(username):
 
+def add_user_session_uuid(username):
     session_id = uuid.uuid4()
     my_user = get_user(username)
     if my_user:
         if "session_id" in my_user:
             if time.time() - 3600 > int(my_user["session_id_time"]):
-                db["ASFBAH"]["project_list"].update({"name": username}, {"$set": {"session_id": str(session_id)}})
+                db["ASFBAH"]["USERS"].update({"name": username}, {"$set": {"session_id": str(session_id)}})
                 return session_id
             else:
                 return my_user["session_id"]
         else:
-            db["ASFBAH"]["project_list"].update({"name": username}, {"$set": {"session_id": str(session_id)}})
-            db["ASFBAH"]["project_list"].update({"name": username}, {"$set": {"session_id_time": time.time()}})
+            db["ASFBAH"]["USERS"].update({"name": username}, {"$set": {"session_id": str(session_id)}})
+            db["ASFBAH"]["USERS"].update({"name": username}, {"$set": {"session_id_time": time.time()}})
             return session_id
     else:
         return False
 
-def must_be_login(f):
 
+def must_be_login(f):
     def test_log():
-        from flask import Response
-        my_response = Response()
-        if "uuid" in my_response.cookies:
-            f()
+        from modules.core.web_app import login
+
+        if "session_id" in request.cookies:
+            user = get_user_by_session_id(request.cookies["session_id"])
+            if not user:
+                return login()
+            else:
+                try:
+                    if time.time() - 3600 > user["session_id_time"]:
+                        db["ASFBAH"]["USERS"].update({"name": user["name"]}, {"$unset": {"session_id": ""}})
+                        db["ASFBAH"]["USERS"].update({"name": user["name"]}, {"$unset": {"session_id_time": ""}})
+                        return login()
+                    else:
+                        return f()
+                except:
+                    return login()
         else:
-            from modules.core.web_app import login
-            login()
+
+
+            return login()
 
 
     return test_log

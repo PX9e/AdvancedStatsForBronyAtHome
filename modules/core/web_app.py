@@ -1,6 +1,6 @@
 import json
 
-from flask import Flask, request, Response
+from flask import Flask, request, Response, redirect
 from flask.templating import render_template
 
 from modules.database.boinc_mongo import (get_collection,
@@ -11,7 +11,7 @@ from modules.database.boinc_mongo import (get_collection,
                                           update_a_project,
                                           remove_a_project,
                                           get_server_date,
-                                          get_all_project_by_date)
+                                          get_all_project_by_date, identification, add_user_session_uuid)
 from modules.database.logging import (get_all_log_harvester)
 from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
@@ -55,7 +55,6 @@ def harvester_server_time():
 @must_be_login
 def harvester_admin():
     projects_to_print = get_all_project()[:]
-
     return render_template('harvester_admin_view.html', projects=projects_to_print,
                            list_function=list_functions)
 
@@ -128,9 +127,20 @@ def get_harvesting_log():
         return str(e)
 
 
-@app.route('/harvester/login'):
+@app.route('/harvester/login')
 def login():
-    
+    parameter = request.args
+    print(str(request.url))
+    cookies = request.cookies
+    print(str(cookies))
+    if "username" in parameter and "password" in parameter:
+        if identification(parameter["username"], parameter["password"]):
+            my_responses = redirect(request.url)
+            my_uuid = add_user_session_uuid(parameter["username"])
+            my_responses.set_cookie("session_id", str(my_uuid) )
+            return my_responses
+
+    return render_template('login_view.html')
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', debug=True)
