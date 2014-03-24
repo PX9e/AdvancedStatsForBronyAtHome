@@ -3,7 +3,6 @@ from pymongo.son_manipulator import ObjectId
 from modules.utils.config import config
 import uuid
 import time
-from flask import request
 
 
 def register_stats_state_in_database(team_state_to_insert, project_name):
@@ -157,28 +156,3 @@ def add_user_session_uuid(username):
         return False
 
 
-def must_be_login(f):
-    def test_log():
-        from modules.core.web_app import login
-
-        if "session_id" in request.cookies:
-            user = get_user_by_session_id(request.cookies["session_id"])
-            if not user:
-                return login()
-            else:
-                try:
-                    if time.time() - 3600 > user["session_id_time"]:
-                        db["ASFBAH"]["USERS"].update({"name": user["name"]}, {"$unset": {"session_id": ""}})
-                        db["ASFBAH"]["USERS"].update({"name": user["name"]}, {"$unset": {"session_id_time": ""}})
-                        return login()
-                    else:
-                        return f()
-                except:
-                    return login()
-        else:
-
-
-            return login()
-
-
-    return test_log
