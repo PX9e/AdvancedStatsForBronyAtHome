@@ -3,6 +3,7 @@ from time import sleep
 from modules.database.boinc_mongo import get_user, add_user
 from modules.utils.config import (config,
                                   generate_secret_key)
+import os
 
 if __name__ == "__main__":
 
@@ -11,15 +12,16 @@ if __name__ == "__main__":
     sleep(2)
     A = "a"
     B = "b"
-    import os
+
 
     if not "SECRET_KEY" in config["ASFBAH"]:
         config["ASFBAH"]["SECRET_KEY"] = generate_secret_key(256)
         config.write(open("asfbah.config", "r+"))
 
-    print("Launching Harvester")
+
     user = get_user("Admin")
     if user:
+        print("Launching Harvester")
         os.popen("python3 modules/core/harvester_launch.py")
         print("Launching Gunicorn")
         os.popen("gunicorn  --chdir modules/core/  web_app:app -w 3 -b 0.0.0.0")
@@ -42,3 +44,10 @@ if __name__ == "__main__":
                 print("password too short")
 
         add_user("Admin", A)
+
+    user = get_user("Admin")
+    if user:
+        print("Launching Harvester")
+        os.popen("python3 modules/core/harvester_launch.py")
+        print("Launching Gunicorn")
+        os.popen("gunicorn  --chdir modules/core/  web_app:app -w 3 -b 0.0.0.0")
