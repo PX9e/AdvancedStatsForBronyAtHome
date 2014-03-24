@@ -130,14 +130,17 @@ def get_harvesting_log():
 @app.route('/harvester/login')
 def login():
     parameter = request.args
-    print(str(request.url))
     cookies = request.cookies
-    print(str(cookies))
     if "username" in parameter and "password" in parameter:
         if identification(parameter["username"], parameter["password"]):
-            my_responses = redirect(request.url)
+            if not "login" in request.url:
+                my_responses = redirect(request.url)
+            else:
+                my_responses = Response()
+                my_responses.set_data(render_template('harvester_main_view.html', logs={}))
             my_uuid = add_user_session_uuid(parameter["username"])
             my_responses.set_cookie("session_id", str(my_uuid) )
+
             return my_responses
 
     return render_template('login_view.html')
