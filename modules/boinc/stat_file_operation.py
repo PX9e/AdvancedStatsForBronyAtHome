@@ -1,4 +1,6 @@
 import time
+from modules.utils.exceptions import NoProjectException
+
 
 class ProjectConfiguration:
     def __init__(self, name=None, url=None, frequency=None, representation=None, last_time_harvested=None,
@@ -84,7 +86,7 @@ def search_team_in_file_by_name_fah(file_path, name):
             team_result["project_type"] = "fah"
             return team_result
 
-    raise Exception("Critical Error: EOF reaches without finding the team")
+    raise NoProjectException("Critical Error: EOF reaches without finding the team")
 
 
 def search_team_in_file_by_name_boinc(file_path, name):
@@ -108,7 +110,7 @@ def search_team_in_file_by_name_boinc(file_path, name):
                 storing = False
         elif storing:
             team_result[tag] = fast_search_value(line)
-    raise Exception("Critical Error: EOF reaches without finding closing tag.")
+    raise NoProjectException("Critical Error: EOF reaches without finding the team")
 
 
 def fast_search_tag(line):

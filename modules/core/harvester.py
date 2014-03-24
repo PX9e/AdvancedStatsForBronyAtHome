@@ -17,45 +17,48 @@ class Singleton(type):
 
 class Harvester(object, metaclass=Singleton):
     def __init__(self):
-
         projects_from_mongo = get_all_project()
-
         self._projects = []
-	self._projects_name = []
+        self._projects_name = []
         for project in projects_from_mongo:
-            if not "name" in project or not "url" in project:
+            if not "name" in project:
                 log_something_harvester("HARVESTER", "TYPE_ERROR",
-                                        "A project without name or url in database, skipped ...")
+                                        "A project without name in database " + str(project._id) + ", skipped ...")
             else:
+                print("initial add " + str(project["name"]))
                 if not project["frequency"]:
                     project["frequency"] = 3600
                     project["ETA"] = 3600
                 else:
-		    project["frequency"] = int(project["frequency"])
-                    project["ETA"] = 0
+                    project["frequency"] = int(project["frequency"])
+                    project["ETA"] = int(project["frequency"])
                 self._projects.append(project)
-		self._projects_name.append(project["name"]) 
-        self.interval = 60
+                self._projects_name.append(project["name"])
+        self.interval = int(config["ASFBAH"]["REFRESH_RATE"])
         self.my_pool_of_processes = Pool(int(config["ASFBAH"]["CPU_CORE_TO_USE_FOR_HARVESTING"]))
         self.refresh = None
         self.check_state_timer()
 
     def update_configuration(self):
+        print("refresh")
         projects_from_mongo = get_all_project()
         for project in projects_from_mongo:
-            if not "name" in project or not "url" in project:
+            if not "name" in project:
                 log_something_harvester("HARVESTER", "TYPE_ERROR",
-                                        "A project without name or url in database, skipped ...")
+                                        "A project without name in database " + str(project._id) + ", skipped ...")
             else:
                 if not project["name"] in self._projects_name:
+                    print("refresh add " + str(project["name"]))
                     if not project["frequency"]:
                         project["frequency"] = 3600
                         project["ETA"] = 0
                     else:
-			project["frequency"] = int(project["frequency"])
+                        project["frequency"] = int(project["frequency"])
                         project["ETA"] = 0
                     self._projects.append(project)
-        	    self._projects_name.append(project["name"]) 
+                    self._projects_name.append(project["name"])
+        print(str(self._projects))
+
 
     def check_state_timer(self):
         self.refresh = Timer(self.interval, self.check_state_timer)
@@ -63,6 +66,7 @@ class Harvester(object, metaclass=Singleton):
         self.refresh.start()
         try:
             for project in self._projects:
+                print("analyzing: " + project["name"] + " ETA: " + str(project["ETA"]))
                 project["ETA"] -= self.interval
                 if project["ETA"] <= 0:
                     project["ETA"] = int(project["frequency"])
@@ -73,6 +77,7 @@ class Harvester(object, metaclass=Singleton):
                     for arg in variables_for_process:
                         parameters += (project[arg],)
                     parameters = ((parameters,))
+                    print("harvesting : " + str(project["name"]))
                     self.my_pool_of_processes.starmap_async(function_to_run, parameters)
         except Exception as e:
             log_something_harvester("Harvester", "TYPE_ERROR", repr(e))
