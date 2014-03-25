@@ -17,7 +17,12 @@ from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
 from modules.database.mongodb_operations_low import db
 
-from modules.core.app import app
+from flask import Flask
+
+
+
+app = Flask(__name__)
+
 
 @app.route('/')
 def hello_world():
