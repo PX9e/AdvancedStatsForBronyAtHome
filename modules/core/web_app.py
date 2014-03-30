@@ -54,22 +54,20 @@ def harvester_projects():
 def harvester_server_time():
     return json.dumps(get_server_date())
 
-@app.route('/harvester/login')
+@app.route('/harvester/login', methods=["GET","POST"])
 def login():
+    print("toto")
+
     parameter = request.args
     cookies = request.cookies
+    print(parameter)
     if "username" in parameter and "password" in parameter:
         if identification(parameter["username"], parameter["password"]):
-            if not "login" in request.url:
-                my_responses = redirect(request.url)
-            else:
-                my_responses = Response()
-                my_responses.set_data(render_template('harvester_main_view.html', logs={}))
+            my_responses = Response()
+            my_responses.set_data(render_template('harvester_main_view.html', logs={}))
             my_uuid = add_user_session_uuid(parameter["username"])
             my_responses.set_cookie("session_id", str(my_uuid) )
-
             return my_responses
-
     return render_template('login_view.html')
 
 
