@@ -3,7 +3,8 @@ from modules.utils.exceptions import NoProjectException
 
 
 class ProjectConfiguration:
-    def __init__(self, name=None, url=None, frequency=None, representation=None, last_time_harvested=None,
+    def __init__(self, name=None, url=None, frequency=None, representation=None,
+                 last_time_harvested=None,
                  function_to_execute=None, type_project=None):
         if frequency:
             try:
@@ -12,8 +13,10 @@ class ProjectConfiguration:
             except ValueError:
                 frequency = 3600
 
-        self.attributs = {"name": name, "url": url, "frequency": frequency, "representation": representation,
-                          "last_time_harvested": last_time_harvested, "harvesting_function": function_to_execute,
+        self.attributs = {"name": name, "url": url, "frequency": frequency,
+                          "representation": representation,
+                          "last_time_harvested": last_time_harvested,
+                          "harvesting_function": function_to_execute,
                           "type": type_project}
 
     def __str__(self):
@@ -31,9 +34,11 @@ class ProjectConfiguration:
 
 class TeamStat:
     def __init__(self):
-        self.attributs = {"id": None, "type": None, "project_type": None, "name": None, "total_credit": None,
+        self.attributs = {"id": None, "type": None, "project_type": None,
+                          "name": None, "total_credit": None,
                           "expavg_credit": None,
-                          "expavg_time": None, "founder": None, "create_time": None, "description": None,
+                          "expavg_time": None, "founder": None,
+                          "create_time": None, "description": None,
                           "country": None, "date": time.time()}
 
     def __str__(self):
@@ -49,8 +54,10 @@ class TeamStat:
         return self.attributs[item]
 
     def get_stats(self):
-        return {"name": self.attributs["name"], "total_credit": self.attributs["total_credit"],
-                "expavg_credit": self.attributs["expavg_credit"], "expavg_time": self.attributs["expavg_time"],
+        return {"name": self.attributs["name"],
+                "total_credit": self.attributs["total_credit"],
+                "expavg_credit": self.attributs["expavg_credit"],
+                "expavg_time": self.attributs["expavg_time"],
                 "date": time.time()}
 
 
@@ -86,7 +93,8 @@ def search_team_in_file_by_name_fah(file_path, name):
             team_result["project_type"] = "fah"
             return team_result
 
-    raise NoProjectException("Critical Error: EOF reaches without finding the team")
+    raise NoProjectException(
+        "Critical Error: EOF reaches without finding the team")
 
 
 def search_team_in_file_by_name_boinc(file_path, name):
@@ -110,7 +118,8 @@ def search_team_in_file_by_name_boinc(file_path, name):
                 storing = False
         elif storing:
             team_result[tag] = fast_search_value(line)
-    raise NoProjectException("Critical Error: EOF reaches without finding the team")
+    raise NoProjectException(
+        "Critical Error: EOF reaches without finding the team")
 
 
 def fast_search_tag(line):
@@ -125,7 +134,6 @@ def fast_search_value(line):
 
 
 def db_dump_data_extraction(file_path, name):
-
     #We open the downloaded file
     file_to_read = open(file_path + name)
 

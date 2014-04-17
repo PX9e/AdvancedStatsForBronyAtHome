@@ -1,8 +1,11 @@
-
 from time import sleep
-from modules.database.boinc_mongo import get_user, add_user
+from modules.database.boinc_mongo import (get_user,
+                                          add_user,
+                                          )
 from modules.utils.config import (config,
-                                  generate_secret_key)
+                                  generate_secret_key,
+                                  )
+
 import os
 
 if __name__ == "__main__":

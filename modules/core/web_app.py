@@ -1,8 +1,10 @@
 import json
 
-from flask import request, Response, redirect
+from flask import (request,
+                   Response,
+                   )
 from flask.templating import render_template
-import time
+
 
 from modules.database.boinc_mongo import (get_collection,
                                           get_all_project,
@@ -11,14 +13,16 @@ from modules.database.boinc_mongo import (get_collection,
                                           update_a_project,
                                           remove_a_project,
                                           get_server_date,
-                                          get_all_project_by_date, identification, add_user_session_uuid, get_user_by_session_id)
-from modules.database.logging import (get_all_log_harvester)
+                                          get_all_project_by_date,
+                                          identification,
+                                          add_user_session_uuid,
+                                          )
+from modules.database.logging import (get_all_log_harvester,
+                                      )
 from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
-from modules.database.mongodb_operations_low import db
 
 from flask import Flask
-
 
 
 app = Flask(__name__)
@@ -35,6 +39,7 @@ def app_get_stats(project):
     for i in get_collection(project):
         res += str(i)
     return res
+
 
 @app.route('/harvester/projects')
 def harvester_projects():
@@ -54,7 +59,8 @@ def harvester_projects():
 def harvester_server_time():
     return json.dumps(get_server_date())
 
-@app.route('/harvester/login', methods=["GET","POST"])
+
+@app.route('/harvester/login', methods=["GET", "POST"])
 def login():
     print("toto")
 
@@ -64,41 +70,19 @@ def login():
     if "username" in parameter and "password" in parameter:
         if identification(parameter["username"], parameter["password"]):
             my_responses = Response()
-            my_responses.set_data(render_template('harvester_main_view.html', logs={}))
+            my_responses.set_data(render_template('harvester_main_view.html',
+                                                  logs={}))
             my_uuid = add_user_session_uuid(parameter["username"])
-            my_responses.set_cookie("session_id", str(my_uuid) )
+            my_responses.set_cookie("session_id", str(my_uuid))
             return my_responses
     return render_template('login_view.html')
 
 
-
-def must_be_login(f):
-    def test_log():
-        if "session_id" in request.cookies:
-            user = get_user_by_session_id(request.cookies["session_id"])
-            if not user:
-                return login()
-            else:
-                try:
-                    if time.time() - 3600 > user["session_id_time"]:
-                        db["ASFBAH"]["USERS"].update({"name": user["name"]}, {"$unset": {"session_id": ""}})
-                        db["ASFBAH"]["USERS"].update({"name": user["name"]}, {"$unset": {"session_id_time": ""}})
-                        return login()
-                    else:
-                        return f()
-                except:
-                    return login()
-        else:
-            return login()
-
-
-    return test_log
-
 @app.route('/harvester/admin')
-@must_be_login
 def harvester_admin():
     projects_to_print = get_all_project()[:]
-    return render_template('harvester_admin_view.html', projects=projects_to_print,
+    return render_template('harvester_admin_view.html',
+                           projects=projects_to_print,
                            list_function=list_functions)
 
 
@@ -139,7 +123,8 @@ def ajax_project_operation_addition():
                     if parameter != "id":
                         new_project[parameter] = parameter_ajax[parameter]
                 register_a_project(new_project)
-                return json.dumps("The project has been correctly added to the database")
+                return json.dumps(
+                    "The project has been correctly added to the database")
             else:
                 return json.dumps("A project already have this name !")
         else:
@@ -168,8 +153,6 @@ def get_harvesting_log():
         return json.dumps(res)
     except Exception as e:
         return str(e)
-
-
 
 
 if __name__ == "__main__":

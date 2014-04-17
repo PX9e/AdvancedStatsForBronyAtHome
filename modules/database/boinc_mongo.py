@@ -6,11 +6,13 @@ import time
 
 
 def register_stats_state_in_database(team_state_to_insert, project_name):
-    db["ASFBAH"]["project_stats"][project_name]["stats"].insert(team_state_to_insert.get_stats())
+    db["ASFBAH"]["project_stats"][project_name]["stats"].insert(
+        team_state_to_insert.get_stats())
 
 
 def register_team_state_in_database(team_state_to_insert, project_name):
-    db["ASFBAH"]["project_stats"][project_name]["teams"].insert(team_state_to_insert.attributs)
+    db["ASFBAH"]["project_stats"][project_name]["teams"].insert(
+        team_state_to_insert.attributs)
 
 
 def get_collection(project_name):
@@ -81,10 +83,12 @@ def get_all_project_by_date(date=None):
 
 
 def update_projects_harvest_time(name):
-    db["ASFBAH"]["project_list"].update({"name": name}, {"$set": {"last_time_harvested": time.time()}})
+    db["ASFBAH"]["project_list"].update({"name": name}, {
+        "$set": {"last_time_harvested": time.time()}})
 
 
-def get_projects_precise(name=None, url=None, representation=None, frequency=None, frequency_parameter="$gte"):
+def get_projects_precise(name=None, url=None, representation=None,
+                         frequency=None, frequency_parameter="$gte"):
     request_parameter = {}
     if name:
         request_parameter["name"] = {name}
@@ -92,7 +96,8 @@ def get_projects_precise(name=None, url=None, representation=None, frequency=Non
         request_parameter["url"] = {url}
     if frequency:
         if not isinstance(frequency, int):
-            request_parameter["frequency"] = {frequency_parameter: int(frequency)}
+            request_parameter["frequency"] = {
+                frequency_parameter: int(frequency)}
     if representation:
         request_parameter["representation"] = {representation}
     return db["ASFBAH"]["project_list"].find(request_parameter)
@@ -119,7 +124,8 @@ def identification(name, password):
 
     user = get_user(name)
     if user:
-        if crypt.crypt(password, "$6$" + config["ASFBAH"]["SECRET_KEY"]) == user["password"]:
+        if crypt.crypt(password, "$6$" + config["ASFBAH"]["SECRET_KEY"]) == \
+                user["password"]:
             return True
         else:
             return False
@@ -131,7 +137,9 @@ def add_user(name, password):
     import crypt
 
     if not get_user(name):
-        user = {"name": name, "password": crypt.crypt(password, "$6$" + config["ASFBAH"]["SECRET_KEY"])}
+        user = {"name": name, "password": crypt.crypt(password,
+                                                      "$6$" + config["ASFBAH"][
+                                                          "SECRET_KEY"])}
         db["ASFBAH"]["USERS"].insert(user)
         return True
     else:
@@ -144,13 +152,16 @@ def add_user_session_uuid(username):
     if my_user:
         if "session_id" in my_user:
             if time.time() - 3600 > int(my_user["session_id_time"]):
-                db["ASFBAH"]["USERS"].update({"name": username}, {"$set": {"session_id": str(session_id)}})
+                db["ASFBAH"]["USERS"].update({"name": username}, {
+                    "$set": {"session_id": str(session_id)}})
                 return session_id
             else:
                 return my_user["session_id"]
         else:
-            db["ASFBAH"]["USERS"].update({"name": username}, {"$set": {"session_id": str(session_id)}})
-            db["ASFBAH"]["USERS"].update({"name": username}, {"$set": {"session_id_time": time.time()}})
+            db["ASFBAH"]["USERS"].update({"name": username}, {
+                "$set": {"session_id": str(session_id)}})
+            db["ASFBAH"]["USERS"].update({"name": username}, {
+                "$set": {"session_id_time": time.time()}})
             return session_id
     else:
         return False

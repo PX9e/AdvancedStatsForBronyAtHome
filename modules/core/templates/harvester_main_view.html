@@ -2,85 +2,112 @@
 <html>
 <head>
     <title>Harvester ASFB@H Experimental Prototype</title>
-    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='harvester.css') }}">
-
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/ink.min.css') }}">
+    <script type=text/javascript src="{{url_for('static', filename='js/jquery-1.10.2.min.js') }}"></script>
+    <script type=text/javascript src="{{url_for('static', filename='js/ink-all.min.js') }}"></script>
 </head>
 <body>
-<div class=top_menu>
-<ul>
-    <li><h3>Harvester Panel</h3></li>
-    <li><p></p><a href="/harvester/admin">Administration</a><p></p></li>
+<nav class="ink-navigation">
+    <ul class="menu horizontal black">
+        <li class="heading active"><a href="#">HARVESTER</a></li>
+        <li><a href="/harvester/admin">Administration</a></li>
+        <li><a href="/harvester">Harvester logs</a></li>
+    </ul>
+</nav>
+<br>
+<br>
+
+<div class="ink-grid">
+    <div class="column-group gutters">
+        <div id="menu" class="all-25 small-100 tiny-100 " >
+
+
+<form class="ink-form" name="table_options">
+<fieldset>
+<div class="control-group">
+    <legend>Filters :</legend>
+     <div class="column-group">
+        <ul class="unstyled">
+        <div class="all-25">
+        <li>
+            <div class="control-group align-center"><label for="check1">Complete</label></div>
+            <div class="control"><input  onclick="refresh()" type="checkbox" name="option1" value="Complete" id="check1" /></div>
+        </li></div>
+        <div class="all-25">
+        <li>
+            <div class="control-group align-center"><label for="check2">Start</label></div>
+            <div class="control"><input onclick="refresh()" type="checkbox" name="option2" value="Start" id="check2" /></div>
+        </li></div>
+         <div class="all-25">
+        <li>
+            <div class="control-group align-center"><label for="check3">Info</label></div>
+            <div class="control"><input onclick="refresh()" type="checkbox" name="option3" value="Info" id="check3" /></div>
+        </li></div>
+        <div class="all-25">
+        <li>
+            <div class="control-group align-center"><label for="check4">Error</label></div>
+            <div class="control"><input onclick="refresh()" type="checkbox" name="option4" value="Error" id="check4" /></div>
+        </li></div>
 </ul>
 </div>
-<div class=left_menu>
-
-
 </div>
-
-<div id=menu class=right_panel>
-
-<h3>Filtering</h3>
-<form name="table_options">
-
-<h4>Types:</h4>
-<table>
-    <tr>
-       <th>Complete</th>
-       <th>Start</th>
-       <th>Info</th>
-       <th>Error</th>
-   </tr>
-     <tr>
-<td><input onclick="refresh()" type="checkbox" name="option1" value="Complete"></td>
-<td><input onclick="refresh()" type="checkbox" name="option2" value="Start"></td>
-<td><input onclick="refresh()" type="checkbox" name="option3" value="Info"></td>
-<td><input onclick="refresh()" type="checkbox" name="option4" value="Error"></td>
-    </tr>
-</table>
-<br>
-<h4>Modules:</h4>
-<input type="text" onkeyup="refresh()" name="module">
-<br>
-<h4>Rows:</h4>
-<input type="text" onkeyup="refresh()" name="rows">
+    <div class="control-group">
+        <label for="module">Modules :</label>
+        <div class="control">
+            <input id="module" type="text" onkeyup="refresh()" name="module">
+        </div>
+         <p class="tip">ex: folding@home</p>
+    </div>
+    <div class="control-group">
+        <label for="rows">Number of rows :</label>
+        <div class="control">
+            <input id="rows" type="text" onkeyup="refresh()" name="rows">
+        </div>
+         <p class="tip">ex: 100</p>
+    </div>
+    </fieldset>
 </form>
 
 </div>
 
-<div class=log_table>
-   <table>
-   <tr>
-       <th> Date </th>
-       <th> Module </th>
-       <th> Type </th>
-       <th> Message </th>
-   </tr>
-{% for log in logs%}
-    <tr>
-       <td>{{log["datetime"]}}</td>
-       <td>{{log["module"]}}</td>
-       <td>{{log["type"]}}</td>
-       <td>{{log["message"]}}</td>
-    </tr>
-{% endfor %}
-      <tr>
-       <td></td>
-       <td></td>
-       <td></td>
-       <td></td>
-    </tr>
-   </table>
+<div class="log_table all-75 small-100 tiny-100">
+       <h2>Logs table</h2>
+       <table class="ink-table hover">
+       <thead><tr>
+           <th class="align-left"> Date </th>
+           <th class="align-left"> Module </th>
+           <th class="align-left"> Type </th>
+           <th class="align-left"> Message </th>
+       </tr></thead><tbody>
+    {% for log in logs%}
+     {% if log["type"] == "TYPE_COMPLETE" %}
+        <tr class="blue">
+    {% elif log["type"] == "TYPE_ERROR" %}
+        <tr class="red">
+    {% elif log["type"] == "TYPE_START" %}
+        <tr class="yellow">
+    {% else %}
+        <tr>
+    {% endif %}
+           <td>{{log["datetime"]}}</td>
+           <td>{{log["module"]}}</td>
+
+           <td>{{log["type"]}}</td>
+
+           <td>{{log["message"]}}</td>
+
+        </tr>
+    {% endfor %}
+       </tbody></table>
 </div>
-<script type=text/javascript src="{{url_for('static', filename='jquery-1.10.2.min.js') }}"></script>
+ </div>
+</div>
 <script>
 jQuery.ajaxSettings.traditional = true;
-
-var table_h = "<table><tr><th> Date </th><th> Module </th><th> Type </th><th> Message </th></tr>";
 var last_date = "";
 var table_back = "";
 var NbRow = 20;
 var types_to_print = new Array();
-
 
 function refresh(){
     types_to_print = [];
@@ -118,29 +145,74 @@ function refresh(){
 
 
     $.getJSON("/harvester/log",{type:types_to_print, module:[], limit:NbRow, module:table_options.module.value},
-      function(feedback){ $('div.log_table tr:not(:first)').remove();
-      $.each(feedback.reverse(), function(i, field){
+      function(feedback){
+          var my_tbody = document.getElementsByTagName('tbody');
+          var my_content = ""
+          for(field in feedback)
+          {
+                     if(feedback[field].type=="TYPE_COMPLETE")
+                     {
+                        my_content +="<tr class='blue'>";
+                     }
+                     else if(feedback[field].type=="TYPE_ERROR")
+                     {
+                        my_content +="<tr class='red'>";
+                     }
+                     else if(feedback[field].type=="TYPE_START")
+                     {
+                        my_content +="<tr class='yellow'>";
+                     }
+                     else
+                     {
+                        my_content +="<tr>";
+                     }
+                     my_content += "<td> " + new Date(feedback[field].datetime * 1000).toUTCString() + " </td><td> "+ feedback[field].module + "</td><td>" + feedback[field].type +" </td><td>"+ feedback[field].message+"</td></tr>";
+                     last_date = feedback[field].datetime;
+          }
+      my_tbody[0].innerHTML = my_content;
+      }
+      );
 
-                 $('div.log_table tr:first').after("<tr><td> " + new Date(field.datetime * 1000).toUTCString() + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
-
-                 last_date = field.datetime;
-
-             }
-         );
-         })
 }
 
 function get_new_logs(){
     $.getJSON("/harvester/log",{datetime: last_date, type:types_to_print, module:[], limit:NbRow, module:table_options.module.value},
-      function(feedback){ $.each(feedback.reverse(), function(i, field){
-                 $('div.log_table tr:last').remove();
-                 $('div.log_table tr:first').after("<tr><td> " + new Date(field.datetime * 1000).toUTCString() + " </td><td> "+ field.module + "</td><td>" + field.type +" </td><td>"+field.message+"</td></tr>");
-                 last_date = field.datetime;
-             }
+      function(feedback){
+      feedback.reverse()
+      for(field in feedback)
+          {
+                     var my_content = "";
+                     var my_list = document.getElementsByTagName('tbody')[0];
+                     var my_rows = my_list.childNodes;
+                     my_rows[my_rows.length-1].remove();
+                     if(feedback[field].type=="TYPE_COMPLETE")
+                     {
+                        my_content ="<tr class='blue'>";
+                     }
+                     else if(feedback[field].type=="TYPE_ERROR")
+                     {
+                        my_content ="<tr class='red'>";
+                     }
+                     else if(feedback[field].type=="TYPE_START")
+                     {
+                        my_content ="<tr class='yellow'>";
+                     }
+                     else
+                     {
+                        my_content ="<tr>";
+                     }
+                     my_content += "<td> " + new Date(feedback[field].datetime * 1000).toUTCString() + " </td><td> "+ feedback[field].module + "</td><td>" + feedback[field].type +" </td><td>"+ feedback[field].message+"</td></tr>" ;
+
+
+                     my_list.innerHTML = my_content + my_list.innerHTML;
+                     last_date = feedback[field].datetime;
+          }
+
+          }
          );
 
-    setTimeout(function(){get_new_logs();}, 5000);})
-}
+    setTimeout(function(){get_new_logs();}, 5000);}
+
 refresh();
 setTimeout(get_new_logs(),5000);
 
