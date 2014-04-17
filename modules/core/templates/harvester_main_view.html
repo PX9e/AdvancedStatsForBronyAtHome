@@ -3,7 +3,7 @@
 <head>
     <title>Harvester ASFB@H Experimental Prototype</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/ink.min.css') }}">
-    <script type=text/javascript src="{{url_for('static', filename='js/jquery-1.10.2.min.js') }}"></script>
+    <script type=text/javascript src="{{url_for('static', filename='js/jquery-1.11.0.min.js') }}"></script>
     <script type=text/javascript src="{{url_for('static', filename='js/ink-all.min.js') }}"></script>
 </head>
 <body>
@@ -22,7 +22,7 @@
         <div id="menu" class="all-25 small-100 tiny-100 " >
 
 
-<form class="ink-form" name="table_options">
+<form class="ink-form" name="table_options" id="table_options">
 <fieldset>
 <div class="control-group">
     <legend>Filters :</legend>
@@ -104,117 +104,116 @@
 </div>
 <script>
 jQuery.ajaxSettings.traditional = true;
-var last_date = "";
-var table_back = "";
-var NbRow = 20;
-var types_to_print = new Array();
+var lastDate = "";
+var nbRowInitial = 20;
+var nbRow = nbRowInitial;
+var typesToPrint = [];
 
 function refresh(){
-    types_to_print = [];
+    typesToPrint = [];
 
-    if(table_options.option1.checked == true)
+    if(true === table_options.option1.checked)
     {
-        types_to_print.push("TYPE_COMPLETE");
+        typesToPrint.push("TYPE_COMPLETE");
     }
-    if(table_options.option2.checked == true)
+    if(true === table_options.option2.checked)
     {
-        types_to_print.push("TYPE_START");
+        typesToPrint.push("TYPE_START");
     }
-    if(table_options.option3.checked == true)
+    if(true === table_options.option3.checked)
     {
-        types_to_print.push("TYPE_INFO");
+        typesToPrint.push("TYPE_INFO");
     }
-    if(table_options.option4.checked == true)
+    if(true === table_options.option4.checked)
     {
-        types_to_print.push("TYPE_ERROR");
-    }
-
-    if(types_to_print==[])
-    {
-        types_to_print.push("TYPE_COMPLETE");
-        types_to_print.push("TYPE_START");
-        types_to_print.push("TYPE_INFO");
-        types_to_print.push("TYPE_ERROR");
-    }
-    NbRow = parseInt(table_options.rows.value);
-
-    if(isNaN(NbRow))
-    {
-        NbRow = 20;
+        typesToPrint.push("TYPE_ERROR");
     }
 
+    if(typesToPrint==[])
+    {
+        typesToPrint.push("TYPE_COMPLETE");
+        typesToPrint.push("TYPE_START");
+        typesToPrint.push("TYPE_INFO");
+        typesToPrint.push("TYPE_ERROR");
+    }
+    nbRow = parseInt(table_options.rows.value);
 
-    $.getJSON("/harvester/log",{type:types_to_print, module:[], limit:NbRow, module:table_options.module.value},
+    if(isNaN(nbRow))
+    {
+        nbRow = nbRowInitial;
+    }
+
+
+    $.getJSON("/harvester/log",{type:typesToPrint, limit:nbRow, module:table_options.module.value},
       function(feedback){
-          var my_tbody = document.getElementsByTagName('tbody');
-          var my_content = ""
+          var mytbody = document.getElementsByTagName('tbody');
+          var mycontent = "";
           for(field in feedback)
           {
-                     if(feedback[field].type=="TYPE_COMPLETE")
-                     {
-                        my_content +="<tr class='blue'>";
+                     switch (feedback[field].type) {
+                         case "TYPE_COMPLETE":
+                             mycontent = "<tr class='blue'>";
+                             break;
+                         case "TYPE_ERROR":
+                             mycontent = "<tr class='red'>";
+                             break;
+                         case "TYPE_START":
+                             mycontent = "<tr class='yellow'>";
+                             break;
+                         default:
+                             mycontent = "<tr>";
+                             break;
                      }
-                     else if(feedback[field].type=="TYPE_ERROR")
-                     {
-                        my_content +="<tr class='red'>";
-                     }
-                     else if(feedback[field].type=="TYPE_START")
-                     {
-                        my_content +="<tr class='yellow'>";
-                     }
-                     else
-                     {
-                        my_content +="<tr>";
-                     }
-                     my_content += "<td> " + new Date(feedback[field].datetime * 1000).toUTCString() + " </td><td> "+ feedback[field].module + "</td><td>" + feedback[field].type +" </td><td>"+ feedback[field].message+"</td></tr>";
-                     last_date = feedback[field].datetime;
+                     mycontent += "<td>" + new Date(feedback[field].datetime * 1000).toUTCString() + " </td><td> "+ feedback[field].module + "</td><td>" + feedback[field].type +" </td><td>"+ feedback[field].message+"</td></tr>";
+                     lastDate = feedback[field].datetime;
           }
-      my_tbody[0].innerHTML = my_content;
+      mytbody[0].innerHTML = mycontent;
       }
       );
 
 }
 
-function get_new_logs(){
-    $.getJSON("/harvester/log",{datetime: last_date, type:types_to_print, module:[], limit:NbRow, module:table_options.module.value},
+function getNewLogs(){
+    $.getJSON("/harvester/log",{datetime: lastDate, type:typesToPrint, limit:nbRow, module:table_options.module.value},
       function(feedback){
-      feedback.reverse()
+      var myRows;
+      var myList;
+      var myContent;
+      feedback.reverse();
       for(field in feedback)
           {
-                     var my_content = "";
-                     var my_list = document.getElementsByTagName('tbody')[0];
-                     var my_rows = my_list.childNodes;
-                     my_rows[my_rows.length-1].remove();
-                     if(feedback[field].type=="TYPE_COMPLETE")
-                     {
-                        my_content ="<tr class='blue'>";
+                     myContent = "";
+                     myList = document.getElementsByTagName('tbody')[0];
+                     myRows = myList.childNodes;
+                     myRows[myRows.length-1].remove();
+                     switch (feedback[field].type) {
+                         case "TYPE_COMPLETE":
+                             myContent = "<tr class='blue'>";
+                             break;
+                         case "TYPE_ERROR":
+                             myContent = "<tr class='red'>";
+                             break;
+                         case "TYPE_START":
+                             myContent = "<tr class='yellow'>";
+                             break;
+                         default:
+                             myContent = "<tr>";
+                             break;
                      }
-                     else if(feedback[field].type=="TYPE_ERROR")
-                     {
-                        my_content ="<tr class='red'>";
-                     }
-                     else if(feedback[field].type=="TYPE_START")
-                     {
-                        my_content ="<tr class='yellow'>";
-                     }
-                     else
-                     {
-                        my_content ="<tr>";
-                     }
-                     my_content += "<td> " + new Date(feedback[field].datetime * 1000).toUTCString() + " </td><td> "+ feedback[field].module + "</td><td>" + feedback[field].type +" </td><td>"+ feedback[field].message+"</td></tr>" ;
+                     myContent += "<td> " + new Date(feedback[field].datetime * 1000).toUTCString() + " </td><td> "+ feedback[field].module + "</td><td>" + feedback[field].type +" </td><td>"+ feedback[field].message+"</td></tr>" ;
 
 
-                     my_list.innerHTML = my_content + my_list.innerHTML;
-                     last_date = feedback[field].datetime;
+                     myList.innerHTML = myContent + myList.innerHTML;
+                     lastDate = feedback[field].datetime;
           }
 
           }
          );
 
-    setTimeout(function(){get_new_logs();}, 5000);}
+    setTimeout(function(){getNewLogs();}, 5000);}
 
 refresh();
-setTimeout(get_new_logs(),5000);
+setTimeout(getNewLogs(),5000);
 
 </script>
 </body>

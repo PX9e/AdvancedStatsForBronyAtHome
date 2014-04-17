@@ -1,3 +1,5 @@
+# coding=utf-8
+
 def extract_file_name_from_url(url):
     return url[url.rfind("/") + 1:]
 

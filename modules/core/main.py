@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from time import sleep
 from modules.database.boinc_mongo import (get_user,
                                           add_user,

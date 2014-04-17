@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from threading import Timer
 from multiprocessing.pool import Pool
 from importlib import import_module

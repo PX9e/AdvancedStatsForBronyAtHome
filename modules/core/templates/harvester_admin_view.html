@@ -3,7 +3,7 @@
 <head>
     <title>Harvester ASFB@H Experimental Prototype</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/ink.min.css') }}">
-    <script type=text/javascript src="{{url_for('static', filename='js/jquery-1.10.2.min.js') }}"></script>
+    <script type=text/javascript src="{{url_for('static', filename='js/jquery-1.11.0.min.js') }}"></script>
     <script type=text/javascript src="{{url_for('static', filename='js/ink-all.min.js') }}"></script>
 </head>
 <body>
@@ -44,7 +44,7 @@
                <div class="control-group">
                 <label for="module">Harvesting function :</label>
                 <div class="control">
-                <select id="{{project['_id']}}-select" onchange="update_fields('{{project['_id']}}', this.value);" name="harvesting_function" >
+                <select id="{{project['_id']}}-select" onchange="updateFields('{{project['_id']}}', this.value);" name="harvesting_function" >
                    {% for z in list_function%}
                     {% if z[0]  == project['harvesting_function'] %}
                    <option selected value="{{z[0]}}">{{z[0]}}</option>
@@ -73,8 +73,8 @@
                         {% endfor %}
                     {% endif %}
                 {% endfor %}
-               <td><div class="align-center"><input onclick="delete_project('{{project['_id']}}')" type="button" name="delete" value="Delete"></div></td>
-               <td><div class="align-center"><input onclick="send_project('{{project['_id']}}');" type="button" name="send" value="Send"></div></td>
+               <td><div class="align-center"><input onclick="deleteProject('{{project["_id"]}}');" type="button" name="delete" value="Delete"></div></td>
+               <td><div class="align-center"><input onclick="sendProject(' {{project["_id"]}}' );" type="button" name="send" value="Send"></div></td>
             </tr>
             </tbody>
 
@@ -89,7 +89,7 @@
             <tr id="new-row">
                 <td>
                 <div class="control-group">
-                <label for="module">Name :</label>
+                <label for="name">Name :</label>
                 <div class="control">
                     <input type="text" name="name" value="">
                 </div>
@@ -99,7 +99,7 @@
                     <div class="control-group">
                 <label for="new-select">Harvesting function :</label>
                 <div class="control">
-                 <select id="new-select" onchange="update_fields('new', this.value);" name="harvesting_function" >
+                 <select id="new-select" onchange="updateFields('new', this.value);" name="harvesting_function" >
                     <option value="" disabled selected style="display:none;"> </option>
                     {% for z in list_function%}
                     <option value="{{z[0]}}">{{z[0]}}</option>
@@ -107,7 +107,7 @@
                 </select>
                 </div>
                  </div>
-               <td><div class="align-center"><input  onclick="send_project('new');" type="button" name="send" value="Send"></div></td>
+               <td><div class="align-center"><input  onclick="sendProject('new');" type="button" name="send" value="Send"></div></td>
                 </td>
             </tr>
 
@@ -119,88 +119,94 @@
 <script>
 jQuery.ajaxSettings.traditional = true;
 var a = {{list_function | safe}};
-var  last_refresh_date = 0;
-var newrow = '<form id="new">'+  document.getElementById("new").innerHTML + '</form>';
+var lastRefreshDate = 0;
+var newRow = '<form id="new">'+  document.getElementById("new").innerHTML + '</form>';
 
 
-function update_fields(name,value)
+function updateFields(name,value)
 {
+    var z;
+    var i;
     var row = document.getElementById(name + "-row");
-    for(var i=0; i<a.length; i++)
+    var x ;
+    for(i=0; i<a.length; i++)
     {
         if(a[i][0]==value)
         {
-            for(var u = row.cells.length-1; u>-1 ; u--)
+            for(z = row.cells.length-1; z>-1 ; z--)
             {
-                if(!get_name_cell(row.cells[u].innerHTML).match("^send$|^delete$|^name$|^harvesting_function$"))
+                if(!getNameCell(row.cells[z].innerHTML).match("^send$|^delete$|^name$|^harvesting_function$"))
                 {
-                    row.deleteCell(u);
+                    row.deleteCell(z);
                 }
             }
 
-            for(var z=0; z< a[i][1].length; z++)
+            for(z=0; z< a[i][1].length; z++)
             {
                 if(name=="new")
                 {
-                    var x = row.insertCell(row.cells.length-1);
+                   x = row.insertCell(row.cells.length-1);
                 }
                 else
                 {
-                    var x = row.insertCell(row.cells.length-2);
+                     x = row.insertCell(row.cells.length-2);
                 }
                 x.innerHTML="<div class='control-group'><label for='module'> "+ a[i][1][z] +" :</label><div class='control'><input type='text' name=" +  a[i][1][z] + " value=''></div>";
-            }
-
-            for(var z=0; z< a[i][1].length; z++)
-            {
-                var newth = document.createElement('th');
-                newth.innerHTML = a[i][1][z];
             }
             break;
         }
     }
-    update_list_project();
+    updateListProject();
 }
 
 
-function update_list_project()
+function updateListProject()
 {
-      var date_before_update  = 0;
+      var dateBeforeUpdate  = 0;
       $.getJSON("/harvester/server_time",undefined,function(feedback){
-      date_before_update = feedback.date;
+      dateBeforeUpdate = feedback.date;
       $.getJSON("/harvester/projects",undefined,function(cfeedback){
-           var it_exists;
-           var id;
-           var my_list_of_project = cfeedback;
-           var list_id_processed = new Array();
-           var table = document.getElementById("log_table");
-           table = table.getElementsByTagName("tr")
-           for(var i=0;i<table.length;i++)
-           {
+            var formToChange;
+            var projetToComplete;
+            var start;
+            var mem;
+            var myNewCode;
+            var hasBeenProcessed;
+            var headerToDelete;
+            var y, z, i;
+            var itExists;
+            var id;
+            var tableElement = document.getElementById("log_table");
+            var tableRows = tableElement.getElementsByTagName("tr");
+            var projectInList, or;
+            var listIdProcessed = [];
+            var origa;
+            for(i=0;i<tableRows.length;i++)
+            {
 
-                id = table[i].id.substring(0,table[i].id.indexOf("-row"));
-                it_exists = false
+                id = tableRows[i].id.substring(0,tableRows[i].id.indexOf("-row"));
+                itExists = false;
 
-                for(project_in_list in my_list_of_project)
+                for(projectInList in cfeedback)
                 {
-                    if(my_list_of_project[project_in_list]._id == id)
+                    if(cfeedback[projectInList]._id == id)
                     {
-                        it_exists = true;
-                        list_id_processed.push(id);
-                        var form_to_change = document.getElementById(id);
-                        if(my_list_of_project[project_in_list].date_update > last_refresh_date)
+                        itExists = true;
+                        listIdProcessed.push(id);
+                        formToChange = document.getElementById(id);
+                        if(cfeedback[projectInList].date_update > lastRefreshDate)
                         {
-                            form_to_change.name.value= my_list_of_project[project_in_list].name;
+                            formToChange.name.value= cfeedback[projectInList].name;
 
-                            if(form_to_change["harvesting_function"].value ==  my_list_of_project[project_in_list].harvesting_function)
+                            if(formToChange["harvesting_function"].value ==  cfeedback[projectInList].harvesting_function)
                             {
-                                 for(var y=0; i<a.length; i++)
+                                 for(y=0; i<a.length; i++)
                                  {
-                                    if(a[y][0]==form_to_change["harvesting_function"].value)
+                                    if(a[y][0]==formToChange["harvesting_function"].value)
                                     {
-                                        for(var z= 0; z< a[y][1].length; z++)
+                                        for(z= 0; z< a[y][1].length; z++)
                                         {
-                                            form_to_change[a[y][1][z]].value = my_list_of_project[project_in_list][a[y][1][z]];
+                                            formToChange[a[y][1][z]].value = cfeedback[projectInList][a[y][1][z]];
                                         }
                                         break;
                                     }
@@ -208,16 +214,16 @@ function update_list_project()
                             }
                             else
                             {
-                                 form_to_change["harvesting_function"].value = my_list_of_project[project_in_list].harvesting_function
-                                 update_fields(id, my_list_of_project[project_in_list].harvesting_function)
-                                 form_to_change = document.getElementById(id);
-                                 for(var y=0; i<a.length; i++)
+                                 formToChange["harvesting_function"].value = cfeedback[projectInList].harvesting_function
+                                 updateFields(id, cfeedback[projectInList].harvesting_function)
+                                 formToChange = document.getElementById(id);
+                                 for(y=0; i<a.length; i++)
                                  {
-                                    if(a[y][0]==form_to_change["harvesting_function"].value)
+                                    if(a[y][0]==formToChange["harvesting_function"].value)
                                     {
-                                        for(var z= 0; z< a[y][1].length; z++)
+                                        for(z= 0; z< a[y][1].length; z++)
                                         {
-                                            form_to_change[a[y][1][z]].value = my_list_of_project[project_in_list][a[y][1][z]];
+                                            formToChange[a[y][1][z]].value = cfeedback[projectInList][a[y][1][z]];
                                         }
                                         break;
                                     }
@@ -227,75 +233,76 @@ function update_list_project()
                         break;
                     }
                 }
-                if(it_exists == false)
+                if(itExists === false)
                 {
-                    var header_to_delete = document.getElementById(id);
-                    header_to_delete.remove();
+                    headerToDelete = document.getElementById(id);
+                    headerToDelete.remove();
                 }
-           }
+            }
 
-           var has_been_processed = false;
-           for(or in my_list_of_project)
+           hasBeenProcessed = false;
+           for(or in cfeedback)
            {
-               has_been_processed = false;
-               for(ir in list_id_processed)
+               hasBeenProcessed = false;
+               for(ir in listIdProcessed)
                {
 
-                    if(my_list_of_project[or]._id ==  list_id_processed[ir])
+                    if(cfeedback[or]._id ==  listIdProcessed[ir])
                     {
-                        has_been_processed = true;
+                        hasBeenProcessed = true;
                         break;
                     }
                }
-               if(has_been_processed == false)
+               if(hasBeenProcessed === false)
                {
-                    var my_new_code = " <form id='" + my_list_of_project[or]._id + "' class='ink-form'><table class='ink-table bordered vertical-space'>";
-                        my_new_code += "<tr id='"+ my_list_of_project[or]._id +"-row'><td><input type='text' name='name' value='"+my_list_of_project[or].name+"'></td>";
-                        my_new_code += "<td><select id='"+ my_list_of_project[or]._id +"-select' onchange='update_fields(\"" + my_list_of_project[or]._id + "\", this.value);' name='harvesting_function' >";
+                        myNewCode = " <form id='" + cfeedback[or]._id + "' class='ink-form'><table class='ink-table bordered vertical-space'>";
+                        myNewCode += "<tr id='"+ cfeedback[or]._id +"-row'><td><input type='text' name='name' value='"+cfeedback[or].name+"'></td>";
+                        myNewCode += "<td><select id='"+ cfeedback[or]._id +"-select' onchange='updateFields(\"" + cfeedback[or]._id + "\", this.value);' name='harvesting_function' >";
 
                         for(origa in a)
                         {
-                            if(a[origa][0] == my_list_of_project[or].harvesting_function)
+                            if(a[origa][0] == cfeedback[or].harvesting_function)
                             {
-                                my_new_code += "<option selected value='"+ a[origa][0] + "'>"+ a[origa][0] +"</option>"
+                                myNewCode += "<option selected value='"+ a[origa][0] + "'>"+ a[origa][0] +"</option>"
                                 mem = origa;
                             }
                             else
                             {
-                                my_new_code += "<option value=" + a[origa][0] + ">"+ a[origa][0]+ "</option>";
+                                myNewCode += "<option value=" + a[origa][0] + ">"+ a[origa][0]+ "</option>";
                             }
                         }
-                        my_new_code += "</select></td>"
-                        my_new_code += "<td><input onclick='delete_project(\""+ my_list_of_project[or]._id +"\");' type='button' name='delete' value='Delete'></td>";
-                        my_new_code += "<td><input onclick='send_project(\""+ my_list_of_project[or]._id +"\");' type='button' name='send' value='Send'></td></tr></table></form>";
-                        var start = elem_to_modify.innerHTML.substring(0,elem_to_modify.innerHTML.indexOf('<form id="new">'))
-                        elem_to_modify.innerHTML = start + my_new_code+newrow
+                        myNewCode += "</select></td>"
+                        myNewCode += "<td><input onclick='deleteProject(\""+ cfeedback[or]._id +"\");' type='button' name='delete' value='Delete'></td>";
+                        myNewCode += "<td><input onclick='sendProject(\""+ cfeedback[or]._id +"\");' type='button' name='send' value='Send'></td></tr></table></form>";
+                        start = tableElement.innerHTML.substring(0,tableElement.innerHTML.indexOf('<form id="new">'))
+                        tableElement.innerHTML = start + myNewCode+newRow
 
-                    update_fields(my_list_of_project[or]._id, my_list_of_project[or].harvesting_function);
-                    var projet_to_complete = document.getElementById(my_list_of_project[or]._id);
-                    for(var z= 0; z< a[mem][1].length; z++)
+                    updateFields(cfeedback[or]._id, cfeedback[or].harvesting_function);
+                    projetToComplete = document.getElementById(cfeedback[or]._id);
+                    for(z= 0; z< a[mem][1].length; z++)
                     {
-                        projet_to_complete[a[mem][1][z]].value = my_list_of_project[or][a[mem][1][z]];
+                        projetToComplete[a[mem][1][z]].value = cfeedback[or][a[mem][1][z]];
                     }
                     break;
                }
            }
-           last_refresh_date = date_before_update
+           lastRefreshDate = dateBeforeUpdate
         });
       });
 
 }
 
-function delete_project(id){
+function deleteProject(id){
             var parameters = Object();
             parameters['id'] = id;
             $.getJSON("/harvester/admin/projectdeletion", parameters, function(feedback){popup(feedback)});
-            update_list_project();
+            updateListProject();
 }
 
-function send_project(name){
-        var my_select = document.getElementById(name + "-select");
-        var parameters = new Object();
+function sendProject(name){
+        var myForm;
+        var mySelect = document.getElementById(name + "-select");
+        var parameters = {}, i;
         if(name=="new")
         {
             parameters["id"] = -1;
@@ -304,20 +311,20 @@ function send_project(name){
         {
             parameters["id"] = name;
         }
-        if((my_select.value !="")&&(!!my_select.value))
+        if((mySelect.value !="")&&(!!mySelect.value))
         {
-            parameters["harvesting_function"] = my_select.value
-            var my_form = document.getElementById(name);
-            for(i=0; i< my_form.elements.length; i++)
+            parameters["harvesting_function"] = mySelect.value;
+            myForm = document.getElementById(name);
+            for(i=0; i< myForm.elements.length; i++)
             {
-                if(my_form.elements[i].type=="text")
+                if(myForm.elements[i].type=="text")
                 {
-                    if(my_form.elements[i].value == "")
+                    if(myForm.elements[i].value == "")
                     {
                         popup("A field is empty, it is impossible to add a project without all the information...");
-                        return False;
+                        return false;
                     }
-                    parameters[my_form.elements[i].name] = my_form.elements[i].value;
+                    parameters[myForm.elements[i].name] = myForm.elements[i].value;
                 }
             }
             if(name=="new")
@@ -330,31 +337,29 @@ function send_project(name){
             }
 
             $.getJSON("/harvester/admin/projectoperation", parameters, function(feedback){popup(feedback)});
-            document.getElementById("new").innerHTML = newrow;
-            update_list_project();
+            document.getElementById("new").innerHTML = newRow;
+            updateListProject();
         }
 
 }
 
 function popup(text)
 {
-    var my_div = document.createElement('div');
-    my_div.innerHTML = text
-    document.getElementsByTagName('body')[0].appendChild(my_div);
-    my_div.className = 'message';
-    setInterval(function(){my_div.remove()},4000);
+    var myDiv = document.createElement('div');
+    myDiv.innerHTML = text;
+    document.getElementsByTagName('body')[0].appendChild(myDiv);
+    myDiv.className = 'message';
+    setInterval(function(){myDiv.remove()},4000);
 }
 
-function get_name_cell(innerHTML){
+function getNameCell(innerHTML){
     var temp = innerHTML.substring(innerHTML.indexOf("name=")+6);
     return temp.substring(0,temp.indexOf("\""));
 }
 function refresh(){
-
-    setTimeout(function(){update_list_project(); refresh();}, 5000);
-
+    setTimeout(function(){updateListProject(); refresh();}, 5000);
 }
-update_list_project()
+updateListProject();
 refresh();
 </script>
 </body>

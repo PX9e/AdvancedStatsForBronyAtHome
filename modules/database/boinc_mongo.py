@@ -1,3 +1,5 @@
+# coding=utf-8
+
 from modules.database.mongodb_operations_low import db
 from pymongo.son_manipulator import ObjectId
 from modules.utils.config import config

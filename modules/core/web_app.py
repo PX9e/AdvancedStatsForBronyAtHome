@@ -1,3 +1,6 @@
+# coding=utf-8
+
+
 import json
 
 from flask import (request,
@@ -26,12 +29,6 @@ from flask import Flask
 
 
 app = Flask(__name__)
-
-
-@app.route('/')
-def hello_world():
-    return 'Hello world'
-
 
 @app.route('/stats/<project>')
 def app_get_stats(project):
