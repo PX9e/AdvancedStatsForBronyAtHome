@@ -3,8 +3,9 @@
 <head>
     <title>Harvester ASFB@H Experimental Prototype</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/ink.min.css') }}">
-    <script type=text/javascript src="{{url_for('static', filename='js/jquery-1.11.0.min.js') }}"></script>
+    <script type=text/javascript src="{{url_for('static', filename='js/jquery-1.10.2.min.js') }}"></script>
     <script type=text/javascript src="{{url_for('static', filename='js/ink-all.min.js') }}"></script>
+    <script type=text/javascript src="{{url_for('static', filename='js/main_view.js') }}"></script>
 </head>
 <body>
 <nav class="ink-navigation">
@@ -103,114 +104,6 @@
  </div>
 </div>
 <script>
-jQuery.ajaxSettings.traditional = true;
-var lastDate = "";
-var nbRowInitial = 20;
-var nbRow = nbRowInitial;
-var typesToPrint = [];
-
-function refresh(){
-    typesToPrint = [];
-
-    if(true === table_options.option1.checked)
-    {
-        typesToPrint.push("TYPE_COMPLETE");
-    }
-    if(true === table_options.option2.checked)
-    {
-        typesToPrint.push("TYPE_START");
-    }
-    if(true === table_options.option3.checked)
-    {
-        typesToPrint.push("TYPE_INFO");
-    }
-    if(true === table_options.option4.checked)
-    {
-        typesToPrint.push("TYPE_ERROR");
-    }
-
-    if(typesToPrint==[])
-    {
-        typesToPrint.push("TYPE_COMPLETE");
-        typesToPrint.push("TYPE_START");
-        typesToPrint.push("TYPE_INFO");
-        typesToPrint.push("TYPE_ERROR");
-    }
-    nbRow = parseInt(table_options.rows.value);
-
-    if(isNaN(nbRow))
-    {
-        nbRow = nbRowInitial;
-    }
-
-
-    $.getJSON("/harvester/log",{type:typesToPrint, limit:nbRow, module:table_options.module.value},
-      function(feedback){
-          var mytbody = document.getElementsByTagName('tbody');
-          var mycontent = "";
-          for(field in feedback)
-          {
-                     switch (feedback[field].type) {
-                         case "TYPE_COMPLETE":
-                             mycontent = "<tr class='blue'>";
-                             break;
-                         case "TYPE_ERROR":
-                             mycontent = "<tr class='red'>";
-                             break;
-                         case "TYPE_START":
-                             mycontent = "<tr class='yellow'>";
-                             break;
-                         default:
-                             mycontent = "<tr>";
-                             break;
-                     }
-                     mycontent += "<td>" + new Date(feedback[field].datetime * 1000).toUTCString() + " </td><td> "+ feedback[field].module + "</td><td>" + feedback[field].type +" </td><td>"+ feedback[field].message+"</td></tr>";
-                     lastDate = feedback[field].datetime;
-          }
-      mytbody[0].innerHTML = mycontent;
-      }
-      );
-
-}
-
-function getNewLogs(){
-    $.getJSON("/harvester/log",{datetime: lastDate, type:typesToPrint, limit:nbRow, module:table_options.module.value},
-      function(feedback){
-      var myRows;
-      var myList;
-      var myContent;
-      feedback.reverse();
-      for(field in feedback)
-          {
-                     myContent = "";
-                     myList = document.getElementsByTagName('tbody')[0];
-                     myRows = myList.childNodes;
-                     myRows[myRows.length-1].remove();
-                     switch (feedback[field].type) {
-                         case "TYPE_COMPLETE":
-                             myContent = "<tr class='blue'>";
-                             break;
-                         case "TYPE_ERROR":
-                             myContent = "<tr class='red'>";
-                             break;
-                         case "TYPE_START":
-                             myContent = "<tr class='yellow'>";
-                             break;
-                         default:
-                             myContent = "<tr>";
-                             break;
-                     }
-                     myContent += "<td> " + new Date(feedback[field].datetime * 1000).toUTCString() + " </td><td> "+ feedback[field].module + "</td><td>" + feedback[field].type +" </td><td>"+ feedback[field].message+"</td></tr>" ;
-
-
-                     myList.innerHTML = myContent + myList.innerHTML;
-                     lastDate = feedback[field].datetime;
-          }
-
-          }
-         );
-
-    setTimeout(function(){getNewLogs();}, 5000);}
 
 refresh();
 setTimeout(getNewLogs(),5000);

@@ -3,13 +3,14 @@
 <head>
     <title>Harvester ASFB@H Experimental Prototype</title>
     <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/ink.min.css') }}">
-    <script type=text/javascript src="{{url_for('static', filename='js/jquery-1.11.0.min.js') }}"></script>
+    <script type=text/javascript src="{{url_for('static', filename='js/jquery-1.10.2.min.js') }}"></script>
     <script type=text/javascript src="{{url_for('static', filename='js/ink-all.min.js') }}"></script>
+    <script type=text/javascript src="{{url_for('static', filename='js/admin_view.js') }}"></script>
 </head>
 <body>
 
 
-<nav class="ink-navigation">
+<nav class="ink-navigation" id="menu">
     <ul class="menu horizontal black">
         <li class="heading active"><a href="#">HARVESTER</a></li>
         <li><a href="/harvester/admin">Administration</a></li>
@@ -42,7 +43,7 @@
                <td>
 
                <div class="control-group">
-                <label for="module">Harvesting function :</label>
+                <label for="{{project['_id']}}-select">Harvesting function :</label>
                 <div class="control">
                 <select id="{{project['_id']}}-select" onchange="updateFields('{{project['_id']}}', this.value);" name="harvesting_function" >
                    {% for z in list_function%}
@@ -64,9 +65,9 @@
                             <td>
 
                                 <div class="control-group">
-                                    <label for="module">{{parameter}} :</label>
+                                    <label for="{{parameter}}">{{parameter}} :</label>
                                     <div class="control">
-                                        <input type="text" name="{{parameter}}" value="{{project[parameter]}}">
+                                        <input type="text" name="{{parameter}}" id="{{parameter}}" value="{{project[parameter]}}">
                                     </div>
                                 </div>
                             </td>
@@ -74,7 +75,7 @@
                     {% endif %}
                 {% endfor %}
                <td><div class="align-center"><input onclick="deleteProject('{{project["_id"]}}');" type="button" name="delete" value="Delete"></div></td>
-               <td><div class="align-center"><input onclick="sendProject(' {{project["_id"]}}' );" type="button" name="send" value="Send"></div></td>
+               <td><div class="align-center"><input onclick="sendProject('{{project["_id"]}}');" type="button" name="send" value="Send"></div></td>
             </tr>
             </tbody>
 
@@ -91,7 +92,7 @@
                 <div class="control-group">
                 <label for="name">Name :</label>
                 <div class="control">
-                    <input type="text" name="name" value="">
+                    <input type="text" name="name" id=name value="">
                 </div>
                 </div>
                 </td>
@@ -108,7 +109,6 @@
                 </div>
                  </div>
                <td><div class="align-center"><input  onclick="sendProject('new');" type="button" name="send" value="Send"></div></td>
-                </td>
             </tr>
 
         </table>
@@ -119,246 +119,8 @@
 <script>
 jQuery.ajaxSettings.traditional = true;
 var a = {{list_function | safe}};
-var lastRefreshDate = 0;
-var newRow = '<form id="new">'+  document.getElementById("new").innerHTML + '</form>';
+var newRow = '<form id="new">' + document.getElementById("new").innerHTML + '</form>';
 
-
-function updateFields(name,value)
-{
-    var z;
-    var i;
-    var row = document.getElementById(name + "-row");
-    var x ;
-    for(i=0; i<a.length; i++)
-    {
-        if(a[i][0]==value)
-        {
-            for(z = row.cells.length-1; z>-1 ; z--)
-            {
-                if(!getNameCell(row.cells[z].innerHTML).match("^send$|^delete$|^name$|^harvesting_function$"))
-                {
-                    row.deleteCell(z);
-                }
-            }
-
-            for(z=0; z< a[i][1].length; z++)
-            {
-                if(name=="new")
-                {
-                   x = row.insertCell(row.cells.length-1);
-                }
-                else
-                {
-                     x = row.insertCell(row.cells.length-2);
-                }
-                x.innerHTML="<div class='control-group'><label for='module'> "+ a[i][1][z] +" :</label><div class='control'><input type='text' name=" +  a[i][1][z] + " value=''></div>";
-            }
-            break;
-        }
-    }
-    updateListProject();
-}
-
-
-function updateListProject()
-{
-      var dateBeforeUpdate  = 0;
-      $.getJSON("/harvester/server_time",undefined,function(feedback){
-      dateBeforeUpdate = feedback.date;
-      $.getJSON("/harvester/projects",undefined,function(cfeedback){
-            var formToChange;
-            var projetToComplete;
-            var start;
-            var mem;
-            var myNewCode;
-            var hasBeenProcessed;
-            var headerToDelete;
-            var y, z, i;
-            var itExists;
-            var id;
-            var tableElement = document.getElementById("log_table");
-            var tableRows = tableElement.getElementsByTagName("tr");
-            var projectInList, or;
-            var listIdProcessed = [];
-            var origa;
-            for(i=0;i<tableRows.length;i++)
-            {
-
-                id = tableRows[i].id.substring(0,tableRows[i].id.indexOf("-row"));
-                itExists = false;
-
-                for(projectInList in cfeedback)
-                {
-                    if(cfeedback[projectInList]._id == id)
-                    {
-                        itExists = true;
-                        listIdProcessed.push(id);
-                        formToChange = document.getElementById(id);
-                        if(cfeedback[projectInList].date_update > lastRefreshDate)
-                        {
-                            formToChange.name.value= cfeedback[projectInList].name;
-
-                            if(formToChange["harvesting_function"].value ==  cfeedback[projectInList].harvesting_function)
-                            {
-                                 for(y=0; i<a.length; i++)
-                                 {
-                                    if(a[y][0]==formToChange["harvesting_function"].value)
-                                    {
-                                        for(z= 0; z< a[y][1].length; z++)
-                                        {
-                                            formToChange[a[y][1][z]].value = cfeedback[projectInList][a[y][1][z]];
-                                        }
-                                        break;
-                                    }
-                                 }
-                            }
-                            else
-                            {
-                                 formToChange["harvesting_function"].value = cfeedback[projectInList].harvesting_function
-                                 updateFields(id, cfeedback[projectInList].harvesting_function)
-                                 formToChange = document.getElementById(id);
-                                 for(y=0; i<a.length; i++)
-                                 {
-                                    if(a[y][0]==formToChange["harvesting_function"].value)
-                                    {
-                                        for(z= 0; z< a[y][1].length; z++)
-                                        {
-                                            formToChange[a[y][1][z]].value = cfeedback[projectInList][a[y][1][z]];
-                                        }
-                                        break;
-                                    }
-                                 }
-                            }
-                        }
-                        break;
-                    }
-                }
-                if(itExists === false)
-                {
-                    headerToDelete = document.getElementById(id);
-                    headerToDelete.remove();
-                }
-            }
-
-           hasBeenProcessed = false;
-           for(or in cfeedback)
-           {
-               hasBeenProcessed = false;
-               for(ir in listIdProcessed)
-               {
-
-                    if(cfeedback[or]._id ==  listIdProcessed[ir])
-                    {
-                        hasBeenProcessed = true;
-                        break;
-                    }
-               }
-               if(hasBeenProcessed === false)
-               {
-                        myNewCode = " <form id='" + cfeedback[or]._id + "' class='ink-form'><table class='ink-table bordered vertical-space'>";
-                        myNewCode += "<tr id='"+ cfeedback[or]._id +"-row'><td><input type='text' name='name' value='"+cfeedback[or].name+"'></td>";
-                        myNewCode += "<td><select id='"+ cfeedback[or]._id +"-select' onchange='updateFields(\"" + cfeedback[or]._id + "\", this.value);' name='harvesting_function' >";
-
-                        for(origa in a)
-                        {
-                            if(a[origa][0] == cfeedback[or].harvesting_function)
-                            {
-                                myNewCode += "<option selected value='"+ a[origa][0] + "'>"+ a[origa][0] +"</option>"
-                                mem = origa;
-                            }
-                            else
-                            {
-                                myNewCode += "<option value=" + a[origa][0] + ">"+ a[origa][0]+ "</option>";
-                            }
-                        }
-                        myNewCode += "</select></td>"
-                        myNewCode += "<td><input onclick='deleteProject(\""+ cfeedback[or]._id +"\");' type='button' name='delete' value='Delete'></td>";
-                        myNewCode += "<td><input onclick='sendProject(\""+ cfeedback[or]._id +"\");' type='button' name='send' value='Send'></td></tr></table></form>";
-                        start = tableElement.innerHTML.substring(0,tableElement.innerHTML.indexOf('<form id="new">'))
-                        tableElement.innerHTML = start + myNewCode+newRow
-
-                    updateFields(cfeedback[or]._id, cfeedback[or].harvesting_function);
-                    projetToComplete = document.getElementById(cfeedback[or]._id);
-                    for(z= 0; z< a[mem][1].length; z++)
-                    {
-                        projetToComplete[a[mem][1][z]].value = cfeedback[or][a[mem][1][z]];
-                    }
-                    break;
-               }
-           }
-           lastRefreshDate = dateBeforeUpdate
-        });
-      });
-
-}
-
-function deleteProject(id){
-            var parameters = Object();
-            parameters['id'] = id;
-            $.getJSON("/harvester/admin/projectdeletion", parameters, function(feedback){popup(feedback)});
-            updateListProject();
-}
-
-function sendProject(name){
-        var myForm;
-        var mySelect = document.getElementById(name + "-select");
-        var parameters = {}, i;
-        if(name=="new")
-        {
-            parameters["id"] = -1;
-        }
-        else
-        {
-            parameters["id"] = name;
-        }
-        if((mySelect.value !="")&&(!!mySelect.value))
-        {
-            parameters["harvesting_function"] = mySelect.value;
-            myForm = document.getElementById(name);
-            for(i=0; i< myForm.elements.length; i++)
-            {
-                if(myForm.elements[i].type=="text")
-                {
-                    if(myForm.elements[i].value == "")
-                    {
-                        popup("A field is empty, it is impossible to add a project without all the information...");
-                        return false;
-                    }
-                    parameters[myForm.elements[i].name] = myForm.elements[i].value;
-                }
-            }
-            if(name=="new")
-            {
-                popup("Adding a new project to the database...");
-            }
-            else
-            {
-                popup("Modifying project ...");
-            }
-
-            $.getJSON("/harvester/admin/projectoperation", parameters, function(feedback){popup(feedback)});
-            document.getElementById("new").innerHTML = newRow;
-            updateListProject();
-        }
-
-}
-
-function popup(text)
-{
-    var myDiv = document.createElement('div');
-    myDiv.innerHTML = text;
-    document.getElementsByTagName('body')[0].appendChild(myDiv);
-    myDiv.className = 'message';
-    setInterval(function(){myDiv.remove()},4000);
-}
-
-function getNameCell(innerHTML){
-    var temp = innerHTML.substring(innerHTML.indexOf("name=")+6);
-    return temp.substring(0,temp.indexOf("\""));
-}
-function refresh(){
-    setTimeout(function(){updateListProject(); refresh();}, 5000);
-}
 updateListProject();
 refresh();
 </script>
