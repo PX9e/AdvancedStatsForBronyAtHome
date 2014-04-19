@@ -11,10 +11,9 @@ from modules.utils.config import (config,
 import os
 
 if __name__ == "__main__":
-
     print("Core Ignition Starting...")
     #give the time to cancel in case of error !
-    sleep(2)
+    sleep(5)
     A = "a"
     B = "b"
 

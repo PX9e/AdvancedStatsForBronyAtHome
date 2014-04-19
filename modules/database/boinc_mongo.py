@@ -1,4 +1,5 @@
 # coding=utf-8
+import pymongo
 
 from modules.database.mongodb_operations_low import db
 from pymongo.son_manipulator import ObjectId
@@ -8,12 +9,12 @@ import time
 
 
 def register_stats_state_in_database(team_state_to_insert, project_name):
-    db["ASFBAH"]["project_stats"][project_name]["stats"].insert(
+    return db["ASFBAH"]["project_stats"][project_name]["stats"].insert(
         team_state_to_insert.get_stats())
 
 
 def register_team_state_in_database(team_state_to_insert, project_name):
-    db["ASFBAH"]["project_stats"][project_name]["teams"].insert(
+    return db["ASFBAH"]["project_stats"][project_name]["teams"].insert(
         team_state_to_insert.attributs)
 
 
@@ -23,7 +24,8 @@ def get_collection(project_name):
 
 def register_a_project(project_configuration_to_save):
     project_configuration_to_save.attributs["date_update"] = time.time()
-    db["ASFBAH"]["project_list"].insert(project_configuration_to_save.attributs)
+    return db["ASFBAH"]["project_list"].insert(
+        project_configuration_to_save.attributs)
 
 
 def update_a_project(keys, updates):
@@ -37,14 +39,18 @@ def update_a_project(keys, updates):
             if not isinstance(updates['_id'], ObjectId):
                 updates['_id'] = ObjectId(updates['_id'])
         updates["date_update"] = time.time()
-        db["ASFBAH"]["project_list"].update(keys, {'$set': updates})
+        return db["ASFBAH"]["project_list"].update(keys, {'$set': updates})
 
 
 def remove_a_project(id_project):
     if id_project:
         if not isinstance(id_project, ObjectId):
             id_project = ObjectId(id_project)
-        db["ASFBAH"]["project_list"].remove({'_id': id_project})
+        db["ASFBAH"]["project_stats"][id_project].drop()
+        db["ASFBAH"]["logging"]["harvester"].remove({'_id': id_project})
+        return db["ASFBAH"]["project_list"].remove({'_id': id_project})
+
+    return None
 
 
 def get_projects_custom(arguments=None, **kwargs):
@@ -85,7 +91,7 @@ def get_all_project_by_date(date=None):
 
 
 def update_projects_harvest_time(name):
-    db["ASFBAH"]["project_list"].update({"name": name}, {
+    return db["ASFBAH"]["project_list"].update({"name": name}, {
         "$set": {"last_time_harvested": time.time()}})
 
 
@@ -167,5 +173,3 @@ def add_user_session_uuid(username):
             return session_id
     else:
         return False
-
-

@@ -5,21 +5,24 @@ from modules.utils.exceptions import NoProjectException
 
 
 class ProjectConfiguration:
-    def __init__(self, name=None, url=None, frequency=None, representation=None,
-                 last_time_harvested=None,
-                 function_to_execute=None, type_project=None):
+    def __init__(self, name=None, function_to_execute=None, frequency=None,
+                 **kwargs):
         if frequency:
             try:
                 if not isinstance(frequency, int):
+                    print(frequency)
                     frequency = int(frequency)
-            except ValueError:
+                    print(frequency)
+            except (ValueError, TypeError):
                 frequency = 3600
 
-        self.attributs = {"name": name, "url": url, "frequency": frequency,
-                          "representation": representation,
-                          "last_time_harvested": last_time_harvested,
-                          "harvesting_function": function_to_execute,
-                          "type": type_project}
+        self.attributs = {"name": name, "frequency": frequency,
+                          "harvesting_function": function_to_execute}
+
+        for keyword, value in kwargs:
+            if isinstance(value, list):
+                print(value)
+                self.attributs[keyword] = value[0]
 
     def __str__(self):
         return str(self.attributs)
@@ -61,23 +64,6 @@ class TeamStat:
                 "expavg_credit": self.attributs["expavg_credit"],
                 "expavg_time": self.attributs["expavg_time"],
                 "date": time.time()}
-
-
-class TeamsResume:
-    def __init__(self):
-        self.list = {}
-
-    def insert_team(self, team):
-        self.list[team.attributs["name"]] = team
-
-    def best_value(self, team, value):
-        max_value = 0
-        for team in self.list:
-            if team.attributs[value] > max_value:
-                max_value = team.attributs[value]
-
-        return max_value
-
 
 def search_team_in_file_by_name_fah(file_path, name):
     file_to_read = open(file_path, "rb")
@@ -182,4 +168,3 @@ def db_tables_data_extraction(file_path, name):
             record_table["total_credit"] = value
             break
     return record_table
-

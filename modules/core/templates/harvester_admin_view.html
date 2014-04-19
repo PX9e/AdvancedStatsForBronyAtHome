@@ -120,6 +120,9 @@
 jQuery.ajaxSettings.traditional = true;
 var a = {{list_function | safe}};
 var newRow = '<form id="new">' + document.getElementById("new").innerHTML + '</form>';
+if (document.getElementById("new-select").value != "") {
+    updateFields("new", document.getElementById("new-select").value);
+}
 
 updateListProject();
 refresh();

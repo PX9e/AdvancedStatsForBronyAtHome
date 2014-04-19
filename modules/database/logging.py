@@ -43,4 +43,3 @@ def get_all_log_harvester(limit=-1, parameter_ajax=None):
         return request.sort("datetime", order).limit(0)
     else:
         return request.sort("datetime", order).limit(limit)
-

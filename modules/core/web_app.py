@@ -5,9 +5,8 @@ import json
 
 from flask import (request,
                    Response,
-                   )
+)
 from flask.templating import render_template
-
 
 from modules.database.boinc_mongo import (get_collection,
                                           get_all_project,
@@ -19,16 +18,18 @@ from modules.database.boinc_mongo import (get_collection,
                                           get_all_project_by_date,
                                           identification,
                                           add_user_session_uuid,
-                                          )
+)
 from modules.database.logging import (get_all_log_harvester,
-                                      )
+)
 from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
 
 from flask import Flask
+import flask_login
 
 
 app = Flask(__name__)
+
 
 @app.route('/stats/<project>')
 def app_get_stats(project):
@@ -49,6 +50,8 @@ def harvester_projects():
     for i in projects:
         i["_id"] = str(i["_id"])
         projects_to_send.append(i)
+
+    print(str(projects_to_send))
     return json.dumps(projects_to_send)
 
 
@@ -59,8 +62,6 @@ def harvester_server_time():
 
 @app.route('/harvester/login', methods=["GET", "POST"])
 def login():
-    print("toto")
-
     parameter = request.args
     cookies = request.cookies
     print(parameter)
@@ -101,27 +102,53 @@ def ajax_project_operation_deletion():
     if "id" in parameter_ajax:
         if parameter_ajax["id"].startswith("id"):
             parameter_ajax["id"] = parameter_ajax["id"][2:]
-        remove_a_project(parameter_ajax["id"])
-        return json.dumps("The project has been deleted")
+        result = remove_a_project(parameter_ajax["id"])
+        if result["err"] is None:
+            return json.dumps({"text":
+                                   "The project has been deleted",
+                               "type":
+                                   "success"})
+        else:
+            return json.dumps({"text":
+                                   "The project has not been deleted, error is:" +
+                                   str(result["err"]),
+                               "type":
+                                   "error"})
     else:
-        return json.dumps("Complete chaos, no Id !")
+        return json.dumps({"text":
+                               "Complete chaos, no Id ! ",
+                           "type":
+                               "error"})
 
 
 @app.route('/harvester/admin/projectoperation')
 def ajax_project_operation_addition():
     parameter_ajax = request.args
-    new_project = ProjectConfiguration()
+
     if "id" in parameter_ajax:
         if parameter_ajax["id"].startswith("id"):
             parameter_ajax = parameter_ajax[2:]
         if parameter_ajax["id"] == "-1":
             if get_projects_custom(name=parameter_ajax["name"]).count() == 0:
-                for parameter in parameter_ajax:
-                    if parameter != "id":
-                        new_project[parameter] = parameter_ajax[parameter]
-                register_a_project(new_project)
-                return json.dumps(
-                    "The project has been correctly added to the database")
+                parameter_ajax = parameter_ajax.copy()
+                print("toto")
+                print(parameter_ajax)
+                del parameter_ajax["id"]
+                new_project = ProjectConfiguration(**parameter_ajax)
+                print(new_project)
+                result = register_a_project(new_project)
+                if result is not None:
+                    return json.dumps(
+                        {"text":
+                             "The project has been correctly added to the database",
+                         "type":
+                             "success"})
+                else:
+                    return json.dumps(
+                        {"text":
+                             "The project has NOT been correctly added to the database",
+                         "type":
+                             "error"})
             else:
                 return json.dumps("A project already have this name !")
         else:
@@ -132,14 +159,36 @@ def ajax_project_operation_addition():
                 for parameter in parameter_ajax:
                     if parameter != "id":
                         update_dict[parameter] = parameter_ajax[parameter]
-                update_a_project({'_id': parameter_ajax['id']}, update_dict)
-                return json.dumps("Update of the project is a success")
+                result = update_a_project({'_id': parameter_ajax['id']},
+                                          update_dict)
+                if result["err"] is None:
+                    return json.dumps(
+                        {"text":
+                             "Update of the project is a success",
+                         "type":
+                             "success"})
+                else:
+                    return json.dumps(
+                        {"text":
+                             "Update of the project failed, error is:" + str(
+                                 result["err"]),
+                         "type":
+                             "error"})
     else:
-        return json.dumps("Complete chaos, no Id ! ")
+        return json.dumps({"text":
+                               "Complete chaos, no Id ! ",
+                           "type":
+                               "error"})
 
 
 @app.route('/harvester/log')
 def get_harvesting_log():
+    """
+    Return the list of logs without the _id of the log.
+    It is used to print a table of logs messages, logged before.
+
+    :return: list or str
+    """
     res = []
     list_of_logs = get_all_log_harvester(parameter_ajax=request.args)
     try:
@@ -153,4 +202,4 @@ def get_harvesting_log():
 
 
 if __name__ == "__main__":
-    app.run(host='0.0.0.0', debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', debug=True, use_reloader=True)

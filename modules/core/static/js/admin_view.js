@@ -1,5 +1,5 @@
 /**
- * Created by guillaume on 4/18/14.
+ * Created by PXke on 4/18/14.
  */
 "use strict"
 
@@ -32,7 +32,6 @@ function updateFields(name, value) {
             break;
         }
     }
-    updateListProject();
 }
 
 function createNewRow(parameters, table) {
@@ -42,10 +41,9 @@ function createNewRow(parameters, table) {
     newRowCode += "<tr id='" + parameters._id + "-row'>";
     newRowCode += "<td><input type='text' name='name' value='" + parameters.name + "'></td>";
     newRowCode += "<td><select id='" + parameters._id + "-select' onchange='updateFields(\"" + parameters._id + "\", this.value);' name='harvesting_function' >";
-
     for (harvest_function in a) {
         if (a[harvest_function][0] === parameters.harvesting_function) {
-            newRowCode += "<option selected value='" + a[harvest_function][0] + "'>" + a[harvest_function][0] + "</option>";
+            newRowCode += "<option value='" + a[harvest_function][0] + "'>" + a[harvest_function][0] + "</option>";
             mem = harvest_function;
         } else {
             newRowCode += "<option value=" + a[harvest_function][0] + ">" + a[harvest_function][0] + "</option>";
@@ -70,11 +68,10 @@ function updateListProject() {
     $.getJSON("/harvester/server_time", undefined, function (feedback) {
         dateBeforeUpdate = feedback.date;
         $.getJSON("/harvester/projects", undefined, function (cfeedback) {
-            var formToChange, projetToComplete, mem, myNewCode,
-                hasBeenProcessed, headerToDelete, y, z, i, itExists, id,
+            var formToChange, hasBeenProcessed, y, z, i, itExists, id,
                 tableElement = document.getElementById("log_table"),
                 tableRows = tableElement.getElementsByTagName("tr"),
-                projectInList, or, listIdProcessed = [], origa, ir;
+                listIdProcessed = [];
             for (i = 0; i < tableRows.length; i = i + 1) {
                 id = tableRows[i].id.substring(0, tableRows[i].id.indexOf("-row"));
                 itExists = false;
@@ -112,8 +109,7 @@ function updateListProject() {
                 });
 
                 if (itExists === false) {
-                    headerToDelete = document.getElementById(id);
-                    headerToDelete.remove();
+                    document.getElementById(id).remove();
                 }
             }
 
@@ -140,14 +136,15 @@ function popup(text, type) {
     myDiv.className = "ink-alert basic " + type;
     textInPopup.textContent = text;
     myDiv.appendChild(textInPopup);
-    document.getElementsByTagName('body')[0].appendChild(myDiv);
+    document.getElementsByTagName('nav')[0].appendChild(myDiv);
     setInterval(function () {myDiv.remove(); }, 4000);
 }
 
 function deleteProject(id) {
     var parameters = {};
     parameters.id = id;
-    $.getJSON("/harvester/admin/projectdeletion", parameters, function (feedback) {popup(feedback); });
+    popup("Deleting project ...", "info");
+    $.getJSON("/harvester/admin/projectdeletion", parameters, function (feedback) {popup(feedback.text, feedback.type); });
     updateListProject();
 }
 
@@ -156,7 +153,7 @@ function deleteProject(id) {
 function sendProject(name) {
 
     var myForm, mySelect = document.getElementById(name + "-select"),
-        parameters = {}, i;
+        parameters = {}, i, myFormInputs;
     if (name === "new") {
         parameters.id = -1;
     } else {
@@ -165,25 +162,28 @@ function sendProject(name) {
     if ((mySelect.value !== "") && (mySelect.value)) {
         parameters.harvesting_function = mySelect.value;
         myForm = document.getElementById(name);
-        for (i = 0; i < myForm.elements.length; i = i + 1) {
-            if (myForm.elements[i].type === "text") {
-                if (myForm.elements[i].value === "") {
-                    popup("A field is empty, it is impossible to add a project without all the information...", "error");
-                    return;
-                }
-                parameters[myForm.elements[i].name] = myForm.elements[i].value;
+        myFormInputs = myForm.getElementsByTagName("input");
+        for (i = 0; i < myFormInputs.length; i = i + 1) {
+            if (myFormInputs[i].value === "") {
+                popup("A field is empty, it is impossible to add a project without all the information...", "error");
+                return;
+            }
+            if ((myFormInputs[i].name !== "send") && (myFormInputs[i].name !== "delete")) {
+                parameters[myFormInputs[i].name] = myFormInputs[i].value;
             }
         }
         if (name === "new") {
-            popup("Adding a new project to the database...", "");
+            popup("Adding a new project to the database...", "info");
         } else {
-            popup("Modifying project ...", "");
+            popup("Modifying project ...", "info");
         }
-        $.getJSON("/harvester/admin/projectoperation", parameters, function (feedback) {popup(feedback); });
+
+        $.getJSON("/harvester/admin/projectoperation", parameters, function (feedback) {popup(feedback.text, feedback.type); });
         document.getElementById("new").innerHTML = newRow;
         updateListProject();
+    } else {
+        popup("A field is empty, it is impossible to add a project without all the information...", "error");
     }
-
 }
 
 

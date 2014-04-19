@@ -30,5 +30,3 @@ def decompression(input_file, direct_output=False):
         output_file.close()
 
         return output_file_path
-
-
