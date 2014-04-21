@@ -10,19 +10,15 @@ class ProjectConfiguration:
         if frequency:
             try:
                 if not isinstance(frequency, int):
-                    print(frequency)
                     frequency = int(frequency)
-                    print(frequency)
             except (ValueError, TypeError):
                 frequency = 3600
 
         self.attributs = {"name": name, "frequency": frequency,
                           "harvesting_function": function_to_execute}
 
-        for keyword, value in kwargs:
-            if isinstance(value, list):
-                print(value)
-                self.attributs[keyword] = value[0]
+        for keyword in kwargs:
+                self.attributs[keyword] = kwargs[keyword]
 
     def __str__(self):
         return str(self.attributs)

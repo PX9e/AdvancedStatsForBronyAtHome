@@ -1,9 +1,8 @@
 # coding=utf-8
-import pymongo
-
 from modules.database.mongodb_operations_low import db
 from pymongo.son_manipulator import ObjectId
 from modules.utils.config import config
+from modules.database.logging import log_something_harvester, TypeLog
 import uuid
 import time
 
@@ -39,6 +38,15 @@ def update_a_project(keys, updates):
             if not isinstance(updates['_id'], ObjectId):
                 updates['_id'] = ObjectId(updates['_id'])
         updates["date_update"] = time.time()
+        project = db["ASFBAH"]["project_list"].find(keys)
+        keys_logging = {"module": project[0]["name"]}
+        try:
+            db["ASFBAH"]["project_stats"][project[0]["name"]]. \
+                rename("project_stats."+ updates["name"])
+        except Exception as e:
+           pass
+        db["ASFBAH"]["logging"]["harvester"].update(
+            keys_logging, {'$set': {"module": updates["name"]}}, multi=True)
         return db["ASFBAH"]["project_list"].update(keys, {'$set': updates})
 
 
@@ -46,8 +54,10 @@ def remove_a_project(id_project):
     if id_project:
         if not isinstance(id_project, ObjectId):
             id_project = ObjectId(id_project)
+        project = db["ASFBAH"]["project_list"].find({'_id': id_project})
         db["ASFBAH"]["project_stats"][id_project].drop()
-        db["ASFBAH"]["logging"]["harvester"].remove({'_id': id_project})
+        db["ASFBAH"]["logging"]["harvester"].remove(
+            {'module': project[0]["name"]})
         return db["ASFBAH"]["project_list"].remove({'_id': id_project})
 
     return None

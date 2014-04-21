@@ -36,7 +36,6 @@ class Harvester(object, metaclass=Singleton):
     We can have only one Harvester at the same time, that's why it is
     a singleton.
     """
-
     def __init__(self):
         projects_from_mongo = get_all_project()
         self._projects = []

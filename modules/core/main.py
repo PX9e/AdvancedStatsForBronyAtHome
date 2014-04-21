@@ -17,11 +17,9 @@ if __name__ == "__main__":
     A = "a"
     B = "b"
 
-
     if not "SECRET_KEY" in config["ASFBAH"]:
         config["ASFBAH"]["SECRET_KEY"] = generate_secret_key(256)
         config.write(open("asfbah.config", "r+"))
-
 
     user = get_user("Admin")
     if user:
@@ -45,7 +43,7 @@ if __name__ == "__main__":
                 if len(A) < 8:
                     print("password too short")
             except:
-                print("password too short")
+                print("password error")
 
         add_user("Admin", A)
 

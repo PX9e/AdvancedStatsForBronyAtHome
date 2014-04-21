@@ -50,8 +50,6 @@ def harvester_projects():
     for i in projects:
         i["_id"] = str(i["_id"])
         projects_to_send.append(i)
-
-    print(str(projects_to_send))
     return json.dumps(projects_to_send)
 
 
@@ -64,7 +62,6 @@ def harvester_server_time():
 def login():
     parameter = request.args
     cookies = request.cookies
-    print(parameter)
     if "username" in parameter and "password" in parameter:
         if identification(parameter["username"], parameter["password"]):
             my_responses = Response()
@@ -78,11 +75,12 @@ def login():
 
 @app.route('/harvester/admin')
 def harvester_admin():
-    projects_to_print = get_all_project()[:]
+    projects_to_print = []
+    for i in get_all_project():
+        projects_to_print.append(i)
     return render_template('harvester_admin_view.html',
                            projects=projects_to_print,
                            list_function=list_functions)
-
 
 @app.route('/harvester')
 def harvester_main():
@@ -124,18 +122,18 @@ def ajax_project_operation_deletion():
 @app.route('/harvester/admin/projectoperation')
 def ajax_project_operation_addition():
     parameter_ajax = request.args
-
     if "id" in parameter_ajax:
         if parameter_ajax["id"].startswith("id"):
             parameter_ajax = parameter_ajax[2:]
         if parameter_ajax["id"] == "-1":
             if get_projects_custom(name=parameter_ajax["name"]).count() == 0:
-                parameter_ajax = parameter_ajax.copy()
-                print("toto")
-                print(parameter_ajax)
+                parameter_ajax = dict(parameter_ajax)
                 del parameter_ajax["id"]
+                for param in parameter_ajax:
+                    if isinstance(parameter_ajax[param], list):
+                        if len(parameter_ajax[param]) == 1:
+                            parameter_ajax[param] = parameter_ajax[param][0]
                 new_project = ProjectConfiguration(**parameter_ajax)
-                print(new_project)
                 result = register_a_project(new_project)
                 if result is not None:
                     return json.dumps(

@@ -27,7 +27,7 @@ function updateFields(name, value) {
                 } else {
                     x = row.insertCell(row.cells.length - 2);
                 }
-                x.innerHTML = "<div class='control-group'><label for='module'> " + a[i][1][z] + " :</label><div class='control'><input type='text' name=" +  a[i][1][z] + " value=''></div>";
+                x.innerHTML = "<div class='control-group'><label'> " + a[i][1][z] + " :</label><div class='control'><input type='text' name=" +  a[i][1][z] + " value=''></div>";
             }
             break;
         }
@@ -39,8 +39,10 @@ function createNewRow(parameters, table) {
     newRowCode = "<form id='" + parameters._id + "' class='ink-form'>";
     newRowCode += "<table class='ink-table bordered vertical-space'>";
     newRowCode += "<tr id='" + parameters._id + "-row'>";
-    newRowCode += "<td><input type='text' name='name' value='" + parameters.name + "'></td>";
-    newRowCode += "<td><select id='" + parameters._id + "-select' onchange='updateFields(\"" + parameters._id + "\", this.value);' name='harvesting_function' >";
+    newRowCode += "<td> <div class='control-group'><label>Name :</label> <div class='control'><input type='text' name='name' value='" + parameters.name + "'> </div></div></td>";
+    newRowCode += "<td> <div class='control-group'><label>Harvesting function :</label><div class='control'>";
+    newRowCode += "<select id='" + parameters._id + "-select' onchange='updateFields(\"" + parameters._id + "\", this.value);' name='harvesting_function' >";
+
     for (harvest_function in a) {
         if (a[harvest_function][0] === parameters.harvesting_function) {
             newRowCode += "<option value='" + a[harvest_function][0] + "'>" + a[harvest_function][0] + "</option>";
@@ -49,7 +51,7 @@ function createNewRow(parameters, table) {
             newRowCode += "<option value=" + a[harvest_function][0] + ">" + a[harvest_function][0] + "</option>";
         }
     }
-    newRowCode += "</select></td>";
+    newRowCode += "</select></div></div></td>";
     newRowCode += "<td><input onclick='deleteProject(\"" + parameters._id + "\");' type='button' name='delete' value='Delete'></td>";
     newRowCode += "<td><input onclick='sendProject(\"" + parameters._id + "\");' type='button' name='send' value='Send'></td>";
     newRowCode += "</tr>";
@@ -68,22 +70,21 @@ function updateListProject() {
     $.getJSON("/harvester/server_time", undefined, function (feedback) {
         dateBeforeUpdate = feedback.date;
         $.getJSON("/harvester/projects", undefined, function (cfeedback) {
-            var formToChange, hasBeenProcessed, y, z, i, itExists, id,
+            var formToChange, hasBeenProcessed, y, z, i, itExists, idRow,
                 tableElement = document.getElementById("log_table"),
                 tableRows = tableElement.getElementsByTagName("tr"),
                 listIdProcessed = [];
             for (i = 0; i < tableRows.length; i = i + 1) {
-                id = tableRows[i].id.substring(0, tableRows[i].id.indexOf("-row"));
+                idRow = tableRows[i].id.substring(0, tableRows[i].id.indexOf("-row"));
                 itExists = false;
                 cfeedback.forEach(function (project) {
-                    if (project._id === id) {
+                    if (project._id === idRow) {
                         itExists = true;
-                        listIdProcessed.push(id);
-                        formToChange = document.getElementById(id);
                         if (project.date_update > lastRefreshDate) {
+                            formToChange = document.getElementById(idRow);
                             formToChange.name.value = project.name;
                             if (formToChange.harvesting_function.value ===  project.harvesting_function) {
-                                for (y = 0; i < a.length; i = i + 1) {
+                                for (y = 0; y < a.length; y = y + 1) {
                                     if (a[y][0] === formToChange.harvesting_function.value) {
                                         for (z = 0; z < a[y][1].length; z = z + 1) {
                                             formToChange[a[y][1][z]].value = project[a[y][1][z]];
@@ -93,9 +94,9 @@ function updateListProject() {
                                 }
                             } else {
                                 formToChange.harvesting_function.value = project.harvesting_function;
-                                updateFields(id, project.harvesting_function);
-                                formToChange = document.getElementById(id);
-                                for (y = 0; i < a.length; i = i + 1) {
+                                updateFields(idRow, project.harvesting_function);
+                                formToChange = document.getElementById(idRow);
+                                for (y = 0; y < a.length; y = y + 1) {
                                     if (a[y][0] === formToChange.harvesting_function.value) {
                                         for (z = 0; z < a[y][1].length; z = z + 1) {
                                             formToChange[a[y][1][z]].value = project[a[y][1][z]];
@@ -105,14 +106,13 @@ function updateListProject() {
                                 }
                             }
                         }
+                        listIdProcessed.push(idRow);
                     }
                 });
-
                 if (itExists === false) {
-                    document.getElementById(id).remove();
+                    document.getElementById(idRow).remove();
                 }
             }
-
             cfeedback.forEach(function (project) {
                 hasBeenProcessed = false;
                 listIdProcessed.forEach(function (Id) {

@@ -110,7 +110,6 @@
                  </div>
                <td><div class="align-center"><input  onclick="sendProject('new');" type="button" name="send" value="Send"></div></td>
             </tr>
-
         </table>
         </form>
         </div>
@@ -123,8 +122,6 @@ var newRow = '<form id="new">' + document.getElementById("new").innerHTML + '</f
 if (document.getElementById("new-select").value != "") {
     updateFields("new", document.getElementById("new-select").value);
 }
-
-updateListProject();
 refresh();
 </script>
 </body>
