@@ -67,68 +67,86 @@ function createNewRow(parameters, table) {
 
 function updateListProject() {
     var dateBeforeUpdate  = 0;
-    $.getJSON("/harvester/server_time", undefined, function (feedback) {
-        dateBeforeUpdate = feedback.date;
-        $.getJSON("/harvester/projects", undefined, function (cfeedback) {
-            var formToChange, hasBeenProcessed, y, z, i, itExists, idRow,
-                tableElement = document.getElementById("log_table"),
-                tableRows = tableElement.getElementsByTagName("tr"),
-                listIdProcessed = [];
-            for (i = 0; i < tableRows.length; i = i + 1) {
-                idRow = tableRows[i].id.substring(0, tableRows[i].id.indexOf("-row"));
-                itExists = false;
-                cfeedback.forEach(function (project) {
-                    if (project._id === idRow) {
-                        itExists = true;
-                        if (project.date_update > lastRefreshDate) {
-                            formToChange = document.getElementById(idRow);
-                            formToChange.name.value = project.name;
-                            if (formToChange.harvesting_function.value ===  project.harvesting_function) {
-                                for (y = 0; y < a.length; y = y + 1) {
-                                    if (a[y][0] === formToChange.harvesting_function.value) {
-                                        for (z = 0; z < a[y][1].length; z = z + 1) {
-                                            formToChange[a[y][1][z]].value = project[a[y][1][z]];
+
+    Ink.requireModules(['Ink.Net.Ajax_1'], function (Ajax) {
+        var uri = '/harvester/server_time';
+        new Ajax(uri, {
+            method: 'GET',
+            parameters: undefined,
+            onSuccess: function (xhrObj, req) {
+                var feedback = JSON.parse(req);
+                dateBeforeUpdate = feedback.date;
+                Ink.requireModules(['Ink.Net.Ajax_1'], function (Ajax) {
+                    var uri = '/harvester/projects';
+                    new Ajax(uri, {
+                        method: 'GET',
+                        parameters: undefined,
+                        onSuccess: function (xhrObj, req) {
+
+                            var cfeedback = JSON.parse(req);
+                            var formToChange, hasBeenProcessed, y, z, i, itExists, idRow,
+                                tableElement = document.getElementById("log_table"),
+                                tableRows = tableElement.getElementsByTagName("tr"),
+                                listIdProcessed = [];
+                            for (i = 0; i < tableRows.length; i = i + 1) {
+                                idRow = tableRows[i].id.substring(0, tableRows[i].id.indexOf("-row"));
+                                itExists = false;
+                                cfeedback.forEach(function (project) {
+                                    if (project._id === idRow) {
+                                        itExists = true;
+                                        if (project.date_update > lastRefreshDate) {
+                                            formToChange = document.getElementById(idRow);
+                                            formToChange.name.value = project.name;
+                                            if (formToChange.harvesting_function.value ===  project.harvesting_function) {
+                                                for (y = 0; y < a.length; y = y + 1) {
+                                                    if (a[y][0] === formToChange.harvesting_function.value) {
+                                                        for (z = 0; z < a[y][1].length; z = z + 1) {
+                                                            formToChange[a[y][1][z]].value = project[a[y][1][z]];
+                                                        }
+                                                        break;
+                                                    }
+                                                }
+                                            } else {
+                                                formToChange.harvesting_function.value = project.harvesting_function;
+                                                updateFields(idRow, project.harvesting_function);
+                                                formToChange = document.getElementById(idRow);
+                                                for (y = 0; y < a.length; y = y + 1) {
+                                                    if (a[y][0] === formToChange.harvesting_function.value) {
+                                                        for (z = 0; z < a[y][1].length; z = z + 1) {
+                                                            formToChange[a[y][1][z]].value = project[a[y][1][z]];
+                                                        }
+                                                        break;
+                                                    }
+                                                }
+                                            }
                                         }
-                                        break;
+                                        listIdProcessed.push(idRow);
                                     }
-                                }
-                            } else {
-                                formToChange.harvesting_function.value = project.harvesting_function;
-                                updateFields(idRow, project.harvesting_function);
-                                formToChange = document.getElementById(idRow);
-                                for (y = 0; y < a.length; y = y + 1) {
-                                    if (a[y][0] === formToChange.harvesting_function.value) {
-                                        for (z = 0; z < a[y][1].length; z = z + 1) {
-                                            formToChange[a[y][1][z]].value = project[a[y][1][z]];
-                                        }
-                                        break;
-                                    }
+                                });
+                                if (itExists === false) {
+                                    document.getElementById(idRow).remove();
                                 }
                             }
-                        }
-                        listIdProcessed.push(idRow);
-                    }
-                });
-                if (itExists === false) {
-                    document.getElementById(idRow).remove();
-                }
-            }
-            cfeedback.forEach(function (project) {
-                hasBeenProcessed = false;
-                listIdProcessed.forEach(function (Id) {
-                    if (project._id ===  Id) {
-                        hasBeenProcessed = true;
-                    }
-                });
+                            cfeedback.forEach(function (project) {
+                                hasBeenProcessed = false;
+                                listIdProcessed.forEach(function (Id) {
+                                    if (project._id ===  Id) {
+                                        hasBeenProcessed = true;
+                                    }
+                                });
 
-                if (hasBeenProcessed === false) {
-                    createNewRow(project, tableElement);
-                }
-            });
-            lastRefreshDate = dateBeforeUpdate;
-        });
+                                if (hasBeenProcessed === false) {
+                                    createNewRow(project, tableElement);
+                                }
+                            });
+                            lastRefreshDate = dateBeforeUpdate;
+                        }});
+                    });
+            }});
     });
-}
+};
+
+
 
 function popup(text, type) {
     var myDiv = document.createElement('div'),
@@ -144,8 +162,18 @@ function deleteProject(id) {
     var parameters = {};
     parameters.id = id;
     popup("Deleting project ...", "info");
-    $.getJSON("/harvester/admin/projectdeletion", parameters, function (feedback) {popup(feedback.text, feedback.type); });
-    updateListProject();
+    Ink.requireModules(['Ink.Net.Ajax_1'], function(Ajax) {
+        var uri = '/harvester/admin/projectdeletion';
+        new Ajax(uri,{
+            method: 'GET',
+            parameters:  parameters,
+            onSuccess: function(xhrObj, req) {
+                var feedback = JSON.parse(req);
+                popup(feedback.text, feedback.type);
+                updateListProject();
+            }
+        });
+    });
 }
 
 
@@ -178,7 +206,18 @@ function sendProject(name) {
             popup("Modifying project ...", "info");
         }
 
-        $.getJSON("/harvester/admin/projectoperation", parameters, function (feedback) {popup(feedback.text, feedback.type); });
+        Ink.requireModules(['Ink.Net.Ajax_1'], function(Ajax) {
+        var uri = "/harvester/admin/projectoperation";
+        new Ajax(uri,{
+            method: 'GET',
+            parameters:  parameters,
+            onSuccess: function(xhrObj, req) {
+                var feedback = JSON.parse(req);
+                popup(feedback.text, feedback.type);
+                updateListProject();
+                }
+            });
+        });
         document.getElementById("new").innerHTML = newRow;
         updateListProject();
     } else {

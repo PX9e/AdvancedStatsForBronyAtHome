@@ -1,8 +1,9 @@
 # coding=utf-8
 
 from time import sleep
-from urllib.request import urlopen, URLError
+from urllib import request, error
 from os.path import isfile
+
 from modules.utils.string_operation import (extract_file_type_from_url,
                                             try_to_extract_project_name_from_url
                                             )
@@ -30,8 +31,8 @@ def download_file(url_of_file, path_to_write_file=None):
     nbtry = 1
     while nbtry < 4 and not connection:
         try:
-            connection = urlopen(url_of_file)
-        except URLError:
+            connection = request.urlopen(url_of_file)
+        except error.URLError:
             print("Connection try %s failed" % nbtry)
             sleep(5)
             nbtry += 1

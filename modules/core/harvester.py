@@ -87,7 +87,6 @@ class Harvester(object, metaclass=Singleton):
                             project["ETA"] = 3600
                     self._projects.append(project)
                     self._projects_name.append(project["name"])
-        print(str(self._projects))
 
     def check_state_timer(self):
         self.refresh = Timer(self.interval, self.check_state_timer)

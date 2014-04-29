@@ -23,14 +23,20 @@ from modules.database.logging import (get_all_log_harvester,
 )
 from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
-
 from flask import Flask
-import flask_login
+from flask_login import (LoginManager,
+                         login_required,
+                         login_user,
+                         )
+from os import urandom
+
 
 
 app = Flask(__name__)
-
-
+app.secret_key = urandom(64)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "/harvester/login"
 @app.route('/stats/<project>')
 def app_get_stats(project):
     res = ""
@@ -60,20 +66,20 @@ def harvester_server_time():
 
 @app.route('/harvester/login', methods=["GET", "POST"])
 def login():
-    parameter = request.args
-    cookies = request.cookies
-    if "username" in parameter and "password" in parameter:
-        if identification(parameter["username"], parameter["password"]):
+    if request.method == "POST":
+        if identification(request.form["username"], request.form["password"]):
+            from modules.utils.users import user
             my_responses = Response()
             my_responses.set_data(render_template('harvester_main_view.html',
                                                   logs={}))
-            my_uuid = add_user_session_uuid(parameter["username"])
-            my_responses.set_cookie("session_id", str(my_uuid))
+            my_user = add_user_session_uuid(request.form["username"])
+            print(login_user(user(my_user)))
             return my_responses
     return render_template('login_view.html')
 
 
 @app.route('/harvester/admin')
+@login_required
 def harvester_admin():
     projects_to_print = []
     for i in get_all_project():
@@ -189,6 +195,7 @@ def get_harvesting_log():
     """
     res = []
     list_of_logs = get_all_log_harvester(parameter_ajax=request.args)
+
     try:
         for log in list_of_logs:
             log_proc = log
@@ -197,6 +204,19 @@ def get_harvesting_log():
         return json.dumps(res)
     except Exception as e:
         return str(e)
+
+
+@login_manager.user_loader
+def load_user(userid):
+    from modules.database.boinc_mongo import db
+    from modules.utils.users import user
+    users = db["ASFBAH"]["USERS"].find({"session_id": userid})
+    if users.count() > 0:
+        return user(users[0])
+    else:
+        return None
+
+
 
 
 if __name__ == "__main__":

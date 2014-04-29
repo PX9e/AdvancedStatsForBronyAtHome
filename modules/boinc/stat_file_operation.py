@@ -15,7 +15,8 @@ class ProjectConfiguration:
                 frequency = 3600
 
         self.attributs = {"name": name, "frequency": frequency,
-                          "harvesting_function": function_to_execute}
+                          "harvesting_function": function_to_execute,
+                          "last_time_harvested": None}
 
         for keyword in kwargs:
                 self.attributs[keyword] = kwargs[keyword]

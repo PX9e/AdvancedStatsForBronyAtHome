@@ -22,23 +22,16 @@ if __name__ == "__main__":
         config.write(open("asfbah.config", "r+"))
 
     user = get_user("Admin")
-    if user:
-        print("Launching Harvester")
-        os.popen("python3 modules/core/harvester_launch.py")
-        print("Launching Gunicorn")
-        os.popen("gunicorn  --chdir modules/core/  web_app:app -w 3 -b 0.0.0.0")
-    else:
-
+    if not user:
         print("No user Admin")
         print("Creation ...")
-        while A != B and len(A) < 8:
+        while A != B or len(A) < 8:
             print("Password?")
             A = input()
             print("Confirm password?")
             B = input()
             if A != B:
                 print("password different retry")
-                print("password too short")
             try:
                 if len(A) < 8:
                     print("password too short")
@@ -48,8 +41,8 @@ if __name__ == "__main__":
         add_user("Admin", A)
 
     user = get_user("Admin")
-    if user:
-        print("Launching Harvester")
-        os.popen("python3 modules/core/harvester_launch.py")
-        print("Launching Gunicorn")
-        os.popen("gunicorn  --chdir modules/core/  web_app:app -w 3 -b 0.0.0.0")
+    print("Launching Harvester")
+    from modules.core.harvester import Harvester
+    Harvester()
+    print("Launching Gunicorn")
+    os.popen("gunicorn --chdir modules/core/ web_app:app -w 3 -b 0.0.0.0:5000")

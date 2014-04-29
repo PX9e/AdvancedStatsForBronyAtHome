@@ -128,15 +128,6 @@ def get_user(name):
     else:
         return None
 
-
-def get_user_by_session_id(uuid):
-    user = db["ASFBAH"]["USERS"].find({"session_id": uuid})
-    if user.count() > 0:
-        return user[0]
-    else:
-        return None
-
-
 def identification(name, password):
     import crypt
 
@@ -172,14 +163,14 @@ def add_user_session_uuid(username):
             if time.time() - 3600 > int(my_user["session_id_time"]):
                 db["ASFBAH"]["USERS"].update({"name": username}, {
                     "$set": {"session_id": str(session_id)}})
-                return session_id
+                return my_user
             else:
-                return my_user["session_id"]
+                return my_user
         else:
             db["ASFBAH"]["USERS"].update({"name": username}, {
                 "$set": {"session_id": str(session_id)}})
             db["ASFBAH"]["USERS"].update({"name": username}, {
                 "$set": {"session_id_time": time.time()}})
-            return session_id
+            return my_user
     else:
         return False
