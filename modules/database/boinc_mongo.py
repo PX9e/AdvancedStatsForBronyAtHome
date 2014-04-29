@@ -42,9 +42,9 @@ def update_a_project(keys, updates):
         keys_logging = {"module": project[0]["name"]}
         try:
             db["ASFBAH"]["project_stats"][project[0]["name"]]. \
-                rename("project_stats."+ updates["name"])
+                rename("project_stats." + updates["name"])
         except Exception as e:
-           pass
+            pass
         db["ASFBAH"]["logging"]["harvester"].update(
             keys_logging, {'$set': {"module": updates["name"]}}, multi=True)
         return db["ASFBAH"]["project_list"].update(keys, {'$set': updates})
@@ -128,6 +128,7 @@ def get_user(name):
     else:
         return None
 
+
 def identification(name, password):
     import crypt
 
@@ -158,11 +159,14 @@ def add_user(name, password):
 def add_user_session_uuid(username):
     session_id = uuid.uuid4()
     my_user = get_user(username)
+    print(my_user)
     if my_user:
         if "session_id" in my_user:
             if time.time() - 3600 > int(my_user["session_id_time"]):
                 db["ASFBAH"]["USERS"].update({"name": username}, {
                     "$set": {"session_id": str(session_id)}})
+                db["ASFBAH"]["USERS"].update({"name": username}, {
+                    "$set": {"session_id_time": time.time()}})
                 return my_user
             else:
                 return my_user
@@ -173,4 +177,4 @@ def add_user_session_uuid(username):
                 "$set": {"session_id_time": time.time()}})
             return my_user
     else:
-        return False
+        return None

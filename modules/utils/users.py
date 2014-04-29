@@ -12,12 +12,10 @@ class user(object):
     def __init__(self, user_dict):
         self._user_param = user_dict
 
-
     def get_id(self):
         return self._user_param["session_id"]
 
     def is_active(self):
-        print(str(self._user_param))
         if time.time() - 3600 > int(self._user_param["session_id_time"]):
             return False
         else:

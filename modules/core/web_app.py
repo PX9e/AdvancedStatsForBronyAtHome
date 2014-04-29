@@ -28,15 +28,16 @@ from flask_login import (LoginManager,
                          login_required,
                          login_user,
                          )
-from os import urandom
 
+from modules.utils.config import config
 
 
 app = Flask(__name__)
-app.secret_key = urandom(64)
+app.secret_key = config["ASFBAH"]["SECRET_KEY"]
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "/harvester/login"
+
 @app.route('/stats/<project>')
 def app_get_stats(project):
     res = ""
@@ -73,7 +74,10 @@ def login():
             my_responses.set_data(render_template('harvester_main_view.html',
                                                   logs={}))
             my_user = add_user_session_uuid(request.form["username"])
+            print(user(my_user).is_active())
+            print("lol")
             print(login_user(user(my_user)))
+
             return my_responses
     return render_template('login_view.html')
 
