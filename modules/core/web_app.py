@@ -74,10 +74,7 @@ def login():
             my_responses.set_data(render_template('harvester_main_view.html',
                                                   logs={}))
             my_user = add_user_session_uuid(request.form["username"])
-            print(user(my_user).is_active())
-            print("lol")
-            print(login_user(user(my_user)))
-
+            login_user(user(my_user))
             return my_responses
     return render_template('login_view.html')
 
@@ -91,6 +88,10 @@ def harvester_admin():
     return render_template('harvester_admin_view.html',
                            projects=projects_to_print,
                            list_function=list_functions)
+
+@app.route('/')
+def root():
+    return render_template('main_page.html')
 
 @app.route('/harvester')
 def harvester_main():

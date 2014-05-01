@@ -157,24 +157,27 @@ def add_user(name, password):
 
 
 def add_user_session_uuid(username):
-    session_id = uuid.uuid4()
+
     my_user = get_user(username)
-    print(my_user)
     if my_user:
         if "session_id" in my_user:
             if time.time() - 3600 > int(my_user["session_id_time"]):
+                session_id = uuid.uuid4()
                 db["ASFBAH"]["USERS"].update({"name": username}, {
                     "$set": {"session_id": str(session_id)}})
                 db["ASFBAH"]["USERS"].update({"name": username}, {
                     "$set": {"session_id_time": time.time()}})
+                my_user = get_user(username)
                 return my_user
             else:
                 return my_user
         else:
+            session_id = uuid.uuid4()
             db["ASFBAH"]["USERS"].update({"name": username}, {
                 "$set": {"session_id": str(session_id)}})
             db["ASFBAH"]["USERS"].update({"name": username}, {
                 "$set": {"session_id_time": time.time()}})
+            my_user = get_user(username)
             return my_user
     else:
         return None

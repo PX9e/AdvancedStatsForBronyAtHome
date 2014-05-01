@@ -1,13 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title></title>
+    <title>Harvester ASFB@H Experimental Prototype</title>
+    <meta name="description" content="Advanced Stats For Brony At Home, stats
+    aggregator for boinc effort of Brony@home.">
+    <meta name="keywords" content="Brony, Boinc, Stats">
+    <meta name="author" content="Guillaume Lastecoueres">
+    <meta charset="UTF-8">
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/ink.min.css') }}">
 </head>
+
+
 <body>
-    <form method="post" action="/harvester/login">
-        <input type="text" name="username">
-        <input type="password" name="password">
-        <input type="submit" name="submit" value="Login">
-    </form>
+    <nav class="ink-navigation" id="menu">
+    <ul class="menu horizontal black">
+        <li class="heading active"><a href="#">HARVESTER</a></li>
+        <li><a href="/harvester/admin">Administration</a></li>
+        <li><a href="/harvester">Harvester logs</a></li>
+    </ul>
+</nav>
+<div class="ink-grid">
+    <div class="column-group">
+        <div class="ink-form all-100 ink-alert basic">
+                <form method="post" action="/harvester/login">
+                    <div class="control-group">
+                        <label>username :</label>
+                        <div class="control">
+                            <input type="text" name="username">
+                        </div>
+                    </div>
+                    <div class="control-group">
+                        <label>password :</label>
+                        <div class="control">
+                            <input type="password" name="password">
+                        </div>
+                    </div>
+                    <input type="submit" name="submit" value="Login">
+                </form>
+        </div>
+    </div>
+</div>
 </body>
 </html>
