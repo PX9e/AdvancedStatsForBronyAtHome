@@ -33,6 +33,7 @@ from modules.utils.config import config
 
 
 app = Flask(__name__)
+
 app.secret_key = config["ASFBAH"]["SECRET_KEY"]
 login_manager = LoginManager()
 login_manager.init_app(app)
