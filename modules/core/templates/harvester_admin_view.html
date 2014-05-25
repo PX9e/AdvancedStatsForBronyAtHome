@@ -19,6 +19,7 @@
         <li class="heading active"><a href="#">HARVESTER</a></li>
         <li><a href="/harvester/admin">Administration</a></li>
         <li><a href="/harvester">Harvester logs</a></li>
+        <li><a href="/">Stats</a></li>
     </ul>
 </nav>
 <br>
@@ -33,7 +34,6 @@
         {% for project in projects%}
         <form id="{{project['_id']}}" class="ink-form">
             <table class="ink-table bordered vertical-space">
-
             <tbody>
             <tr id="{{project['_id']}}-row">
             <td>
@@ -60,9 +60,7 @@
                 </select>
                 </div>
             </div>
-
                </td>
-
                 {% for element in list_function %}
                     {% if element[0] == project["harvesting_function"] %}
                         {% for parameter in element[1]%}

@@ -3,31 +3,23 @@
 
 import json
 
-from flask import (request,
-                   Response,
-)
+from flask import request, Response
 from flask.templating import render_template
 
-from modules.database.boinc_mongo import (get_collection,
-                                          get_all_project,
+from modules.database.boinc_mongo import (get_collection, get_all_project,
                                           register_a_project,
-                                          get_projects_custom,
-                                          update_a_project,
-                                          remove_a_project,
-                                          get_server_date,
+                                          get_projects_custom, update_a_project,
+                                          remove_a_project, get_server_date,
                                           get_all_project_by_date,
-                                          identification,
-                                          add_user_session_uuid,
-)
-from modules.database.logging import (get_all_log_harvester,
-)
+                                          identification, add_user_session_uuid,
+                                          get_list_all_project,
+                                          get_list_all_user)
+from modules.database.logging import get_all_log_harvester
+
 from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
 from flask import Flask
-from flask_login import (LoginManager,
-                         login_required,
-                         login_user,
-                         )
+from flask_login import LoginManager, login_required, login_user
 
 from modules.utils.config import config
 
@@ -39,12 +31,15 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "/harvester/login"
 
+
 @app.route('/stats/<project>')
 def app_get_stats(project):
-    res = ""
+    res = []
     for i in get_collection(project):
-        res += str(i)
-    return res
+        value = i
+        del value["_id"]
+        res.append(value)
+    return json.dumps(res)
 
 
 @app.route('/harvester/projects')
@@ -71,12 +66,16 @@ def login():
     if request.method == "POST":
         if identification(request.form["username"], request.form["password"]):
             from modules.utils.users import user
+
             my_responses = Response()
             my_responses.set_data(render_template('harvester_main_view.html',
                                                   logs={}))
             my_user = add_user_session_uuid(request.form["username"])
             login_user(user(my_user))
             return my_responses
+        else:
+            return render_template('login_view.html', message="Password or "
+                                                       "username invalid")
     return render_template('login_view.html')
 
 
@@ -90,9 +89,15 @@ def harvester_admin():
                            projects=projects_to_print,
                            list_function=list_functions)
 
+@app.route('/stats/summary')
+def get_summary():
+    o=0
+
 @app.route('/')
 def root():
-    return render_template('main_page.html')
+    return render_template('main_page.html', projects=get_list_all_project(),
+                           users=get_list_all_user())
+
 
 @app.route('/harvester')
 def harvester_main():
@@ -120,7 +125,8 @@ def ajax_project_operation_deletion():
                                    "success"})
         else:
             return json.dumps({"text":
-                                   "The project has not been deleted, error is:" +
+                                   "The project has not been deleted, "
+                                   "error is:" +
                                    str(result["err"]),
                                "type":
                                    "error"})
@@ -150,13 +156,15 @@ def ajax_project_operation_addition():
                 if result is not None:
                     return json.dumps(
                         {"text":
-                             "The project has been correctly added to the database",
+                             "The project has been correctly added to the "
+                             "database",
                          "type":
                              "success"})
                 else:
                     return json.dumps(
                         {"text":
-                             "The project has NOT been correctly added to the database",
+                             "The project has NOT been correctly added to the "
+                             "database",
                          "type":
                              "error"})
             else:
@@ -216,13 +224,12 @@ def get_harvesting_log():
 def load_user(userid):
     from modules.database.boinc_mongo import db
     from modules.utils.users import user
+
     users = db["ASFBAH"]["USERS"].find({"session_id": userid})
     if users.count() > 0:
         return user(users[0])
     else:
         return None
-
-
 
 
 if __name__ == "__main__":

@@ -20,7 +20,6 @@ def register_team_state_in_database(team_state_to_insert, project_name):
 def get_collection(project_name):
     return db["ASFBAH"]["project_stats"][project_name]["stats"].find({})
 
-
 def register_a_project(project_configuration_to_save):
     project_configuration_to_save.attributs["date_update"] = time.time()
     return db["ASFBAH"]["project_list"].insert(
@@ -93,6 +92,15 @@ def get_server_date():
 def get_all_project():
     return db["ASFBAH"]["project_list"].find({})
 
+def get_list_all_project():
+    my_list_result = []
+    projects = db["ASFBAH"]["project_list"].find({})
+    for project in projects:
+        my_list_result.append(project)
+    return my_list_result
+
+def get_list_all_user():
+    return None
 
 def get_all_project_by_date(date=None):
     if not date or date == 0:

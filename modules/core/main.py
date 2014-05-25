@@ -45,4 +45,4 @@ if __name__ == "__main__":
     from modules.core.harvester import Harvester
     Harvester()
     print("Launching Gunicorn")
-    os.popen("gunicorn --chdir modules/core/ web_app:app -w 3 -b 0.0.0.0:5000")
+    os.popen("gunicorn web_app:app -w 3 -b 0.0.0.0:5000")
