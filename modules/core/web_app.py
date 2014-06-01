@@ -34,12 +34,7 @@ login_manager.login_view = "/harvester/login"
 
 @app.route('/stats/<project>')
 def app_get_stats(project):
-    res = []
-    for i in get_collection(project):
-        value = i
-        del value["_id"]
-        res.append(value)
-    return json.dumps(res)
+    return json.dumps(get_collection(project))
 
 
 @app.route('/harvester/projects')
@@ -95,9 +90,13 @@ def get_summary():
 
 @app.route('/')
 def root():
-    return render_template('main_page.html', projects=get_list_all_project(),
-                           users=get_list_all_user())
+    import time
+    start = time.time()
 
+    Q = render_template('main_page.html', projects=get_list_all_project(),
+                           users=get_list_all_user())
+    print(time.time() - start)
+    return Q
 
 @app.route('/harvester')
 def harvester_main():

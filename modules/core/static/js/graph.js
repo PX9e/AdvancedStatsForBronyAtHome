@@ -1,14 +1,16 @@
-function graphA(project_stat) {
+function graphA(project_stat, property) {
     var vis = d3.select("#graph_area").append("svg");
-    var w = 900,
-         h = 400;
+    var w = document.getElementById('graph_area').offsetWidth;
+    console.log(w);
+    var h = w * 0.75;
+    console.log(h);
     vis.attr("width", w)
         .attr("height", h);
     vis.text("test").select("#graph_area");
 
 
     var y = d3.scale.linear()
-        .domain([d3.min(project_stat, function(d) { return d.total_credit; }), d3.max(project_stat, function(d) { return d.total_credit; })])
+        .domain([d3.min(project_stat, function(d) { return d[property]; }), d3.max(project_stat, function(d) { return d[property]; })])
         .range([20, h-10]);
 
     var x = d3.scale.linear()
@@ -34,7 +36,7 @@ function graphA(project_stat) {
 
     node.append("svg:circle")
         .attr("cx", function(d) { return x(d.date); })
-        .attr("cy", function(d) { return y(d.total_credit); })
+        .attr("cy", function(d) { return y(d[property]); })
         .attr("r", "3px")
         .attr("fill", "blue");
 

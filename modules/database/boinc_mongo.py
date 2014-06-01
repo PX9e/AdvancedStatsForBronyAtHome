@@ -1,8 +1,8 @@
 # coding=utf-8
+from modules.boinc.stat_file_operation import TeamStat
 from modules.database.mongodb_operations_low import db
 from pymongo.son_manipulator import ObjectId
 from modules.utils.config import config
-from modules.database.logging import log_something_harvester, TypeLog
 import uuid
 import time
 
@@ -18,7 +18,13 @@ def register_team_state_in_database(team_state_to_insert, project_name):
 
 
 def get_collection(project_name):
-    return db["ASFBAH"]["project_stats"][project_name]["stats"].find({})
+    team_transformer = TeamStat()
+    final_result = []
+    for i in db["ASFBAH"]["project_stats"][project_name]["stats"].find({}):
+        print(i)
+        team_transformer.attributs = i
+        final_result.append(team_transformer.get_stats().copy())
+    return final_result
 
 def register_a_project(project_configuration_to_save):
     project_configuration_to_save.attributs["date_update"] = time.time()

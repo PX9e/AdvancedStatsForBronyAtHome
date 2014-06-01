@@ -12,11 +12,11 @@
     <script type=text/javascript src="{{url_for('static', filename='js/ink-all.min.js') }}"></script>
     <script type=text/javascript src="{{url_for('static', filename='js/stats_view.js') }}"></script>
     <script type=text/javascript src="{{url_for('static', filename='js/d3.min.js') }}"></script>
-     <script type=text/javascript src="{{url_for('static', filename='js/graph.js') }}"></script>
+    <script type=text/javascript src="{{url_for('static', filename='js/graph.js') }}"></script>
 </head>
 <body>
 <nav class="ink-navigation">
-    <ul class="menu horizontal black">
+    <ul id="main_menu" class="menu horizontal black">
         <li  class="heading active"><a href='#'>ASFBAH</a></li>
         <li>
             <a href="#">Team</a>
@@ -50,10 +50,11 @@
 
         </div>
 
-        <div  class="ink-form all-33 ">
-            <p>toto</p>
-        </div>
+        <div  class="ink-navigation all-33 ">
+            <ul id="second_menu" class="menu vertical black vertical-space">
+            </ul>
         </div>
     </div>
+</div>
 </body>
 </html>

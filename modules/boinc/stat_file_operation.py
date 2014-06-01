@@ -36,12 +36,11 @@ class ProjectConfiguration:
 
 class TeamStat:
     def __init__(self):
-        self.attributs = {"id": None, "type": None, "project_type": None,
+        self.attributs = {"project_type": None,
                           "name": None, "total_credit": None,
                           "expavg_credit": None,
-                          "expavg_time": None, "founder": None,
-                          "create_time": None, "description": None,
-                          "country": None, "date": time.time()}
+                          "expavg_time": None,
+                          "create_time": None, "date": time.time()}
 
     def __str__(self):
         return str(self.attributs)
@@ -56,11 +55,11 @@ class TeamStat:
         return self.attributs[item]
 
     def get_stats(self):
-        return {"name": self.attributs["name"],
+        return {"name": self.attributs["name"], "date": self.attributs["date"], "data": {
                 "total_credit": self.attributs["total_credit"],
                 "expavg_credit": self.attributs["expavg_credit"],
                 "expavg_time": self.attributs["expavg_time"],
-                "date": time.time()}
+                }}
 
 def search_team_in_file_by_name_fah(file_path, name):
     file_to_read = open(file_path, "rb")
