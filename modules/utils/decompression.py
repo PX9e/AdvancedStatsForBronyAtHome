@@ -1,3 +1,4 @@
+# coding=utf-8
 import gzip
 import bz2
 
@@ -29,5 +30,3 @@ def decompression(input_file, direct_output=False):
         output_file.close()
 
         return output_file_path
-
-

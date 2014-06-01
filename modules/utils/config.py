@@ -1,8 +1,10 @@
+# coding=utf-8
+
 import configparser
 
 
 config = configparser.ConfigParser()
-config.read("asfbah.config")
+config.read("../../asfbah.config")
 
 
 def generate_secret_key(length):

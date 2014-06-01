@@ -1,2 +1,4 @@
 pymongo
 flask
+gunicorn
+flask_login

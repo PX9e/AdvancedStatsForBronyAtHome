@@ -1,20 +1,25 @@
+# coding=utf-8
+
 import time
 from modules.utils.exceptions import NoProjectException
 
 
 class ProjectConfiguration:
-    def __init__(self, name=None, url=None, frequency=None, representation=None, last_time_harvested=None,
-                 function_to_execute=None, type_project=None):
+    def __init__(self, name=None, function_to_execute=None, frequency=None,
+                 **kwargs):
         if frequency:
             try:
                 if not isinstance(frequency, int):
                     frequency = int(frequency)
-            except ValueError:
+            except (ValueError, TypeError):
                 frequency = 3600
 
-        self.attributs = {"name": name, "url": url, "frequency": frequency, "representation": representation,
-                          "last_time_harvested": last_time_harvested, "harvesting_function": function_to_execute,
-                          "type": type_project}
+        self.attributs = {"name": name, "frequency": frequency,
+                          "harvesting_function": function_to_execute,
+                          "last_time_harvested": None}
+
+        for keyword in kwargs:
+                self.attributs[keyword] = kwargs[keyword]
 
     def __str__(self):
         return str(self.attributs)
@@ -31,10 +36,11 @@ class ProjectConfiguration:
 
 class TeamStat:
     def __init__(self):
-        self.attributs = {"id": None, "type": None, "project_type": None, "name": None, "total_credit": None,
+        self.attributs = {"project_type": None,
+                          "name": None, "total_credit": None,
                           "expavg_credit": None,
-                          "expavg_time": None, "founder": None, "create_time": None, "description": None,
-                          "country": None, "date": time.time()}
+                          "expavg_time": None,
+                          "create_time": None, "date": time.time()}
 
     def __str__(self):
         return str(self.attributs)
@@ -49,26 +55,11 @@ class TeamStat:
         return self.attributs[item]
 
     def get_stats(self):
-        return {"name": self.attributs["name"], "total_credit": self.attributs["total_credit"],
-                "expavg_credit": self.attributs["expavg_credit"], "expavg_time": self.attributs["expavg_time"],
-                "date": time.time()}
-
-
-class TeamsResume:
-    def __init__(self):
-        self.list = {}
-
-    def insert_team(self, team):
-        self.list[team.attributs["name"]] = team
-
-    def best_value(self, team, value):
-        max_value = 0
-        for team in self.list:
-            if team.attributs[value] > max_value:
-                max_value = team.attributs[value]
-
-        return max_value
-
+        return {"name": self.attributs["name"], "date": self.attributs["date"], "data": {
+                "total_credit": self.attributs["total_credit"],
+                "expavg_credit": self.attributs["expavg_credit"],
+                "expavg_time": self.attributs["expavg_time"],
+                }}
 
 def search_team_in_file_by_name_fah(file_path, name):
     file_to_read = open(file_path, "rb")
@@ -86,7 +77,8 @@ def search_team_in_file_by_name_fah(file_path, name):
             team_result["project_type"] = "fah"
             return team_result
 
-    raise NoProjectException("Critical Error: EOF reaches without finding the team")
+    raise NoProjectException(
+        "Critical Error: EOF reaches without finding the team")
 
 
 def search_team_in_file_by_name_boinc(file_path, name):
@@ -110,7 +102,8 @@ def search_team_in_file_by_name_boinc(file_path, name):
                 storing = False
         elif storing:
             team_result[tag] = fast_search_value(line)
-    raise NoProjectException("Critical Error: EOF reaches without finding the team")
+    raise NoProjectException(
+        "Critical Error: EOF reaches without finding the team")
 
 
 def fast_search_tag(line):
@@ -125,7 +118,6 @@ def fast_search_value(line):
 
 
 def db_dump_data_extraction(file_path, name):
-
     #We open the downloaded file
     file_to_read = open(file_path + name)
 
@@ -172,4 +164,3 @@ def db_tables_data_extraction(file_path, name):
             record_table["total_credit"] = value
             break
     return record_table
-
