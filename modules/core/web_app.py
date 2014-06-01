@@ -90,13 +90,10 @@ def get_summary():
 
 @app.route('/')
 def root():
-    import time
-    start = time.time()
 
-    Q = render_template('main_page.html', projects=get_list_all_project(),
+    return render_template('main_page.html', projects=get_list_all_project(),
                            users=get_list_all_user())
-    print(time.time() - start)
-    return Q
+
 
 @app.route('/harvester')
 def harvester_main():

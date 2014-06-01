@@ -1,49 +1,62 @@
-function graphA(project_stat, property) {
-    var vis = d3.select("#graph_area").append("svg");
-    var w = document.getElementById('graph_area').offsetWidth;
-    console.log(w);
-    var h = w * 0.75;
-    console.log(h);
-    vis.attr("width", w)
-        .attr("height", h);
-    vis.text("test").select("#graph_area");
+var chart;
 
+function graph_line_chart(project_stat, properties, update) {
 
-    var y = d3.scale.linear()
-        .domain([d3.min(project_stat, function(d) { return d[property]; }), d3.max(project_stat, function(d) { return d[property]; })])
-        .range([20, h-10]);
+    var i, y,
+        my_dates = ['x'],
+        my_properties = {},
+        my_columns =[];
 
-    var x = d3.scale.linear()
-        .domain([d3.min(project_stat, function(d) { return d.date; }), d3.max(project_stat, function(d) { return d.date; })])
-        .range([10, w-10]);
+    for(y = 0; y < properties.length; y++)
+    {
+        my_properties[properties[y]] = [properties[y]];
+    }
 
-    var node = vis.selectAll("circle.node")
-        .data(project_stat)
-        .enter().append("g")
-        .attr("class", "node");
+    for(i = 0; i < project_stat.length; i++)
+    {
+        my_dates.push(new Date(project_stat[i]["date"]*1000));
 
+        for(y = 0; y < properties.length; y++)
+        {
+            my_properties[properties[y]].push(project_stat[i][properties[y]]);
+        }
+    }
 
-    var xAxis = d3.svg.axis()
-        .ticks(5)
-        .scale(x)
-        .orient("bottom");
+    for(y = 0; y < properties.length; y++)
+    {
+        my_columns.push(my_properties[properties[y]]);
+    }
+    my_columns.push(my_dates);
 
+    if(update == false)
+    {
+        chart = c3.generate({
+        bindto: '#graph_area',
+            size: {
+            height:  document.getElementById('graph_area').offsetWidth * 0.75,
+            width:  document.getElementById('graph_area').offsetWidth - 50
+        },
+        data: {
+          x: 'x',
+          columns: my_columns,
+          type: 'line'
+        },
+        axis: {
+            x: {
+                type: 'timeseries',
+                localtime: true,
+                tick: {
+                    format: '%Y-%m-%d %H:%M:%S',
+                    rotate: 90,
+                },
+                height: 130
+            }
+        }
+        });
+    } else { 
+        chart.load({
+        columns: my_columns
+    });
+    }
 
-    vis.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + (h-20) + ")")
-        .call(xAxis);
-
-    node.append("svg:circle")
-        .attr("cx", function(d) { return x(d.date); })
-        .attr("cy", function(d) { return y(d[property]); })
-        .attr("r", "3px")
-        .attr("fill", "blue");
-
-
-    vis.selectAll("circle.nodes")
-        .data(project_stat)
-        .enter()
-        .append("svg:circle")
-        .attr("cx", function(d) { return x(d.date); });
 }

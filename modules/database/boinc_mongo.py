@@ -21,7 +21,6 @@ def get_collection(project_name):
     team_transformer = TeamStat()
     final_result = []
     for i in db["ASFBAH"]["project_stats"][project_name]["stats"].find({}):
-        print(i)
         team_transformer.attributs = i
         final_result.append(team_transformer.get_stats().copy())
     return final_result

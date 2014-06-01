@@ -13,6 +13,8 @@
     <script type=text/javascript src="{{url_for('static', filename='js/stats_view.js') }}"></script>
     <script type=text/javascript src="{{url_for('static', filename='js/d3.min.js') }}"></script>
     <script type=text/javascript src="{{url_for('static', filename='js/graph.js') }}"></script>
+    <script type=text/javascript src="{{url_for('static', filename='js/c3.min.js') }}"></script>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/c3.css') }}">
 </head>
 <body>
 <nav class="ink-navigation">
@@ -45,7 +47,7 @@
     </ul>
 </nav>
 <div class="ink-grid">
-    <div class="column-group gutters">
+    <div class="column-group  large-half-horizontal-gutters">
         <div id="graph_area" class="ink-form all-66 ">
 
         </div>
