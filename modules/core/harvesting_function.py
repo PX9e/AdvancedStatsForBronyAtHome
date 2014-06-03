@@ -7,7 +7,8 @@ from time import time
 from modules.boinc.stat_file_operation import (db_tables_data_extraction,
                                                db_dump_data_extraction,
                                                search_team_in_file_by_name_boinc,
-                                               search_team_in_file_by_name_fah)
+                                               search_team_in_file_by_name_fah,
+                                               TeamStat)
 from modules.database.boinc_mongo import (update_projects_harvest_time,
                                           register_stats_state_in_database)
 from modules.database.logging import log_something_harvester, TypeLog
@@ -19,6 +20,7 @@ from modules.utils.exceptions import NoProjectException
 
 def harvest_boinc_project(name, url, last_time_harvested):
     try:
+        team_result = TeamStat()
         log_something_harvester(name, TypeLog.Start, "STARTING ... ")
         start = time()
         log_something_harvester(name, TypeLog.Info, "Downloading tables.xml...")
@@ -27,9 +29,8 @@ def harvest_boinc_project(name, url, last_time_harvested):
                                   + name + path.sep + "tables.xml")
         log_something_harvester(name, TypeLog.Info, "Processing tables.xml...")
         info_table_xml = db_tables_data_extraction("", table_xml)
-
-        if (last_time_harvested and last_time_harvested < info_table_xml[
-            "last_update"]) or (not last_time_harvested):
+        print(str(info_table_xml) + " " + str(last_time_harvested))
+        if (not last_time_harvested) or (last_time_harvested and last_time_harvested <= info_table_xml["last_update"]):
             log_something_harvester(name, TypeLog.Info,
                                     "Downloading db_dump.xml ... ")
             dump_xml = download_file(url + "db_dump.xml",
@@ -50,9 +51,9 @@ def harvest_boinc_project(name, url, last_time_harvested):
                                     "Looking for " + config["ASFBAH"][
                                         "TEAM"] + " data ... ")
             try:
-                team = search_team_in_file_by_name_boinc(file_pr,
+                team_result.attributs.update(search_team_in_file_by_name_boinc(file_pr,
                                                          config["ASFBAH"][
-                                                             "TEAM"])
+                                                             "TEAM"]))
             except NoProjectException:
                 log_something_harvester(name, TypeLog.Info,
                                         "No Team " + config["ASFBAH"][
@@ -60,7 +61,7 @@ def harvest_boinc_project(name, url, last_time_harvested):
                 return None
             log_something_harvester(name, TypeLog.Info,
                                     "Injecting into database ... ")
-            register_stats_state_in_database(team, name)
+            register_stats_state_in_database(team_result, name)
             update_projects_harvest_time(name)
             elapsed = (time() - start)
             log_something_harvester(name, TypeLog.Compelete, "Complete in " +

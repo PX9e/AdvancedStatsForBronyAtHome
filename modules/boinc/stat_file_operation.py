@@ -55,6 +55,7 @@ class TeamStat:
         return self.attributs[item]
 
     def get_stats(self):
+        print(self)
         return {"name": self.attributs["name"], "date": self.attributs["date"], "data": {
                 "total_credit": self.attributs["total_credit"],
                 "expavg_credit": self.attributs["expavg_credit"],
@@ -83,7 +84,7 @@ def search_team_in_file_by_name_fah(file_path, name):
 
 def search_team_in_file_by_name_boinc(file_path, name):
     file_to_read = open(file_path, "r")
-    team_result = TeamStat()
+    team_result = {}
     to_return = False
     storing = False
 
@@ -102,8 +103,7 @@ def search_team_in_file_by_name_boinc(file_path, name):
                 storing = False
         elif storing:
             team_result[tag] = fast_search_value(line)
-    raise NoProjectException(
-        "Critical Error: EOF reaches without finding the team")
+    raise NoProjectException("Critical Error: EOF reaches without finding the team")
 
 
 def fast_search_tag(line):
