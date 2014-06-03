@@ -90,7 +90,6 @@ def get_summary():
 
 @app.route('/')
 def root():
-
     return render_template('main_page.html', projects=get_list_all_project(),
                            users=get_list_all_user())
 

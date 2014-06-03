@@ -18,11 +18,12 @@ def register_team_state_in_database(team_state_to_insert, project_name):
 
 
 def get_collection(project_name):
-    team_transformer = TeamStat()
+    temp = None
     final_result = []
     for i in db["ASFBAH"]["project_stats"][project_name]["stats"].find({}):
-        team_transformer.attributs = i
-        final_result.append(team_transformer.get_stats().copy())
+        temp = i
+        del temp['_id']
+        final_result.append(temp)
     return final_result
 
 def register_a_project(project_configuration_to_save):
