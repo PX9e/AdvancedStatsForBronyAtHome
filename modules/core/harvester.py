@@ -40,6 +40,7 @@ class Harvester(object, metaclass=Singleton):
         projects_from_mongo = get_all_project()
         self._projects = []
         self._projects_name = []
+        self._cycle_number = 0
         for project in projects_from_mongo:
             if not "name" in project:
                 log_something_harvester("HARVESTER", "TYPE_ERROR",
@@ -90,8 +91,8 @@ class Harvester(object, metaclass=Singleton):
 
     def check_state_timer(self):
         self.refresh = Timer(self.interval, self.check_state_timer)
-
         self.refresh.start()
+        del self.refresh
         try:
             for project in self._projects:
                 print("analyzing: " + project["name"] + " ETA: " + str(
@@ -113,14 +114,19 @@ class Harvester(object, metaclass=Singleton):
                                                             parameters)
         except Exception as e:
             log_something_harvester("Harvester", "TYPE_ERROR", repr(e))
-        self.update_configuration()
+
+        if self._cycle_number % 5 == 0:
+            self.update_configuration()
+        if self._cycle_number > 1440:
+            self._cycle_number = 0
+            pass
+        self._cycle_number +=1
 
     def stop(self):
         """
         Public method which allows to completely stop the harvester.
         It close the pool of process and stop the timer which periodically
         call the harvesting functions.
-
         """
         self.refresh.cancel()
         self.my_pool_of_processes.close()
@@ -129,7 +135,6 @@ class Harvester(object, metaclass=Singleton):
         """
         Public method which allows to start the Harvester.
         #FIXME: Don't restart the pool of processes !!
-
         """
         #FIXME: Don't restart the pool of processes !!
         self.refresh = Timer(self.interval, self.check_state_timer)

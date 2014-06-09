@@ -16,9 +16,11 @@ def register_team_state_in_database(team_state_to_insert, project_name):
     return db["ASFBAH"]["project_stats"][project_name]["teams"].insert(
         team_state_to_insert.attributs)
 
+def clean_data_base_project(project, name):
+    seventy_hours_in_sec = 259200
+
 
 def get_collection(project_name):
-    temp = None
     final_result = []
     for i in db["ASFBAH"]["project_stats"][project_name]["stats"].find({}):
         temp = i
