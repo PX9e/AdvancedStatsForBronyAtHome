@@ -10,19 +10,21 @@ function getProjectData(project_name) {
             method: 'GET',
             onSuccess: function(xhrObj, req) {
                 current_data_project = JSON.parse(req);
+                console.log(current_data_project);
                 data_array = new Array();
                 var my_menu = document.getElementById("second_menu");
-                var propertiesList = Object.getOwnPropertyNames(current_data_project[0].data);
+                console.log(current_data_project[0].team_data);
+                var propertiesList = Object.getOwnPropertyNames(current_data_project[0].team_data);
                 for(var i = 0 ; i < current_data_project.length;i++)
                 {
-                    tempdata = current_data_project[i].data;
+                    tempdata = current_data_project[i].team_data;
                     tempdata["date"] =  current_data_project[i]["date"];
                     data_array.push(tempdata);
                 }
                 my_menu.innerHTML = "";
                 for(var y = 0 ; y < propertiesList.length; y++)
                 {
-                    if(current_data_project[0].data[propertiesList[y]] != null)
+                    if(current_data_project[0].team_data[propertiesList[y]] != null)
                     {
                         my_menu.appendChild(create_list_element(propertiesList[y]));
                     }
