@@ -29,10 +29,12 @@ def boinc_compute_extra_stats(Team):
             team_data["total_credit"]) / float(project_data["total_credit"])
 
     if "members" in team_data and "nusers" in project_data:
-        team_data["member_percent"] = team_data["members"]/project_data["nusers"]
+        team_data["member_percent"] = float(team_data["members"]) / float(
+            project_data["nusers"])
 
     if "hosts" in team_data and "nhosts" in project_data:
-        team_data["member_percent"] = team_data["hosts"]/project_data["nhosts"]
+        team_data["hosts_percent"] = float(team_data["hosts"]) / float(
+            project_data["nhosts"])
 
     Team.attributs["team_data"] = team_data
     return Team
@@ -95,7 +97,7 @@ def harvest_boinc_project(name, url, last_time_harvested):
             file_pr = decompression(file_to_extract, False)
             log_something_harvester(name, TypeLog.Info,
                                     "Downloading host file... ")
-            users = search_users_in_file_by_id_boinc(file_pr,team_result["id"])
+            users = search_users_in_file_by_id_boinc(file_pr, team_result["id"])
             team_result.attributs["team_data"]["members"] = len(users)
             file_to_extract = download_file(
                 url + files_to_download["host"]["file"] + ".gz",

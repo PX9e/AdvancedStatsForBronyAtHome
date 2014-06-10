@@ -50,14 +50,14 @@ class Harvester(object, metaclass=Singleton):
                 print("initial add " + str(project["name"]))
                 if not project["frequency"]:
                     project["frequency"] = 3600
-                    project["ETA"] = 3600
+                    project["ETA"] = 0
                 else:
                     try:
                         project["frequency"] = int(project["frequency"])
-                        project["ETA"] = int(project["frequency"])
+                        project["ETA"] = 0
                     except (TypeError, ValueError):
                         project["frequency"] = 3600
-                        project["ETA"] = 3600
+                        project["ETA"] = 0
                 self._projects.append(project)
                 self._projects_name.append(project["name"])
         self.interval = int(config["ASFBAH"]["REFRESH_RATE"])
@@ -82,10 +82,10 @@ class Harvester(object, metaclass=Singleton):
                     else:
                         try:
                             project["frequency"] = int(project["frequency"])
-                            project["ETA"] = int(project["frequency"])
+                            project["ETA"] = 0
                         except (TypeError, ValueError):
                             project["frequency"] = 3600
-                            project["ETA"] = 3600
+                            project["ETA"] = 0
                     self._projects.append(project)
                     self._projects_name.append(project["name"])
 
