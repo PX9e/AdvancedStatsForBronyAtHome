@@ -28,6 +28,7 @@ def get_collection(project_name):
         final_result.append(temp)
     return final_result
 
+
 def register_a_project(project_configuration_to_save):
     project_configuration_to_save.attributs["date_update"] = time.time()
     return db["ASFBAH"]["project_list"].insert(

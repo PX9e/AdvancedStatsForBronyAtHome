@@ -40,7 +40,7 @@ class TeamStat:
                           "name": None, "date": time.time(),
                           "team_data": {},
                           "project_data": {}
-                          }
+        }
 
     def __str__(self):
         return str(self.attributs)
@@ -80,6 +80,7 @@ def search_team_in_file_by_name_fah(file_path, name):
         index_after_read = file_to_read.tell()
     raise NoProjectException(
         "Critical Error: EOF reaches without finding the team")
+
 
 def search_users_in_file_by_id_boinc(file_path, teamid):
     file_to_read = open(file_path)
@@ -141,41 +142,68 @@ def search_hosts_in_file_by_ids_boinc(file_path, usersid):
 
     return hosts
 
+
 def search_team_in_file_by_name_boinc(file_path, name):
+    from copy import deepcopy
     team_data_to_extract = ["total_credit", "expavg_credit", "expavg_time"]
     project_data_to_extract = []
     global_data_to_extract = ["name", "id"]
     file_to_read = open(file_path)
-    team_result = TeamStat().attributs
+    temp_team = TeamStat().attributs
+    result_team = {}
     to_return = False
     storing = False
     index_before_read = 0
     index_after_read = -1
+    teamscores = []
+    number_of_team = 0
     while index_after_read != index_before_read:
         index_before_read = file_to_read.tell()
         line = file_to_read.readline()
         tag = fast_search_tag(line)
         if tag == "team":
             storing = True
-        elif tag == "/team" and to_return:
-            team_result["project_type"] = "boinc"
-            return team_result
+        elif tag == "/team":
+            if to_return:
+                temp_team["project_type"] = "boinc"
+                result_team = deepcopy(temp_team)
+            teamscores.append(temp_team["team_data"]["total_credit"])
+            storing = False
+            to_return = False
+            number_of_team += 1
         elif tag == "name":
-            team_result[tag] = fast_search_value(line)
-            if team_result[tag] == name:
+            temp_team[tag] = fast_search_value(line)
+            if temp_team[tag] == name:
                 to_return = True
-            else:
-                storing = False
         elif storing:
             if tag in team_data_to_extract:
-                team_result["team_data"][tag] = fast_search_value(line)
+                try:
+                    temp_team["team_data"][tag] = float(fast_search_value(line))
+                except ValueError:
+                    temp_team["team_data"][tag] = fast_search_value(line)
             elif tag in project_data_to_extract:
-                team_result["project_data"] = fast_search_value(line)
+                try:
+                    temp_team["project_data"][tag] = float(fast_search_value(line))
+                except ValueError:
+                    temp_team["project_data"][tag] = fast_search_value(line)
             elif tag in global_data_to_extract:
-                team_result[tag] = fast_search_value(line)
+                try:
+                    temp_team[tag] = float(fast_search_value(line))
+                except ValueError:
+                    temp_team[tag] = fast_search_value(line)
+
         index_after_read = file_to_read.tell()
-    raise NoProjectException(
-        "Critical Error: EOF reaches without finding the team")
+
+    teamscores = sorted(teamscores, reverse=True)
+    print(teamscores)
+    result_team["team_data"]["position"] = teamscores.index(
+        result_team["team_data"]["total_credit"]) + 1
+    result_team["project_data"]["total_teams"] = number_of_team
+    if result_team:
+        return result_team
+    else:
+        raise NoProjectException(
+            "Critical Error: EOF reaches without finding the team")
 
 
 def fast_search_tag(line):

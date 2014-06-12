@@ -36,6 +36,10 @@ def boinc_compute_extra_stats(Team):
         team_data["hosts_percent"] = float(team_data["hosts"]) / float(
             project_data["nhosts"])
 
+    if "positions" in team_data and "total_teams" in project_data:
+        team_data["superiority"] = float(team_data["positions"]) / float(
+            project_data["total_teams"])
+
     Team.attributs["team_data"] = team_data
     return Team
 
@@ -53,8 +57,8 @@ def harvest_boinc_project(name, url, last_time_harvested):
         info_table_xml = db_tables_data_extraction("", table_xml)
 
         if (not last_time_harvested) or (
-                last_time_harvested and last_time_harvested <= info_table_xml[
-                "last_update"]):
+                last_time_harvested and (last_time_harvested + 1) <
+                info_table_xml["last_update"]):
             del info_table_xml["last_update"]
             for project_data in info_table_xml:
                 team_result["project_data"][project_data] = info_table_xml[
@@ -117,8 +121,7 @@ def harvest_boinc_project(name, url, last_time_harvested):
             update_projects_harvest_time(name)
             elapsed = (time() - start)
             log_something_harvester(name, TypeLog.Compelete, "Complete in " +
-                                                             str(
-                                                                 round(elapsed,
+                                                             str(round(elapsed,
                                                                        3)) + " sec")
         else:
             log_something_harvester(name, TypeLog.Compelete,
@@ -141,8 +144,8 @@ def harvest_folding_at_home_project(name="Folding@Home"):
         log_something_harvester(name, TypeLog.Info, "Extracting ... ")
         file_pr = decompression(file_to_extract, False)
         log_something_harvester(name, TypeLog.Info,
-                                "Looking for " + config["ASFBAH"][
-                                    "TEAM"] + " data ... ")
+                                "Looking for " + config["ASFBAH"]["TEAM"] +
+                                " data ... ")
         try:
             team = search_team_in_file_by_name_fah(file_pr,
                                                    config["ASFBAH"]["TEAM"])
@@ -157,11 +160,12 @@ def harvest_folding_at_home_project(name="Folding@Home"):
         elapsed = (time() - start)
         log_something_harvester(name, TypeLog.Compelete, "Complete in " + str(
             round(elapsed, 3)) + " sec")
-
     except Exception as e:
         log_something_harvester(name, TypeLog.Error, repr(e))
 
 
 list_functions = [
-    ["harvest_boinc_project", ["representation", "url", "frequency"]],
-    ["harvest_folding_at_home_project", ["representation", "frequency"]]]
+    ["harvest_boinc_project",
+     ["representation", "url", "frequency", "category", "description"]],
+    ["harvest_folding_at_home_project",
+     ["representation", "frequency", "category", "descritipion"]]]
