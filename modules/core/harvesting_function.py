@@ -168,4 +168,4 @@ list_functions = [
     ["harvest_boinc_project",
      ["representation", "url", "frequency", "category", "description"]],
     ["harvest_folding_at_home_project",
-     ["representation", "frequency", "category", "descritipion"]]]
+     ["representation", "frequency", "category", "description"]]]
