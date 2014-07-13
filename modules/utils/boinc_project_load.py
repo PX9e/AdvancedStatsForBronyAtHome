@@ -5,9 +5,9 @@ from modules.boinc.stat_file_operation import ProjectConfiguration
 
 def load_boinc_project_from_wiki():
     from urllib.request import urlopen
-
-    # html = urlopen("http://boinc.berkeley.edu/wiki/Project_list").read().decode(
-    #     'utf-8')
+    import time
+    StartTime = time.time()
+    # html = urlopen("http://boinc.berkeley.edu/wiki/Project_list").read().decode('utf-8')
 
     file = open("/home/guillaume/Downloads/Project list - BOINC.htm")
     html = file.readlines()
@@ -21,9 +21,11 @@ def load_boinc_project_from_wiki():
                 if i.index("toclevel-1"):
                         result = extract_toctext(i)
                         dict_categories[result[1]] = result[0]
-            if i.index("")
+            if i.index(""):
+                o = 0
         except ValueError:
             pass
+    print("End of import in {0} seconds".format(time.time() - StartTime))
 
 
 

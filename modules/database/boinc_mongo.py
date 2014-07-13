@@ -16,8 +16,29 @@ def register_team_state_in_database(team_state_to_insert, project_name):
     return db["ASFBAH"]["project_stats"][project_name]["teams"].insert(
         team_state_to_insert.attributs)
 
-def clean_data_base_project(project, name):
+
+def clean_database_project(project_name):
     seventy_hours_in_sec = 259200
+    twenty_four_hours_in_sec = 86400
+
+    current_time = time.time()
+
+    data_points = db["ASFBAH"]["project_stats"][project_name]["stats"].find({})
+    data_points_to_process = []
+
+    for data_point in data_points:
+        if not data_point["date"] > current_time - seventy_hours_in_sec:
+            data_points_to_process.append(data_point)
+
+    data_points_to_process_sorted = sorted(data_points_to_process, key=lambda x: x["date"])
+
+    prima_date = 0
+
+    for data_point in data_points_to_process_sorted:
+        if data_point["date"] - twenty_four_hours_in_sec < prima_date:
+            db["ASFBAH"]["project_stats"][project_name]["stats"].remove({'_id': data_point['_id']})
+        else:
+            prima_date = data_point["date"]
 
 
 def get_collection(project_name):
@@ -101,6 +122,7 @@ def get_server_date():
 def get_all_project():
     return db["ASFBAH"]["project_list"].find({})
 
+
 def get_list_all_project():
     my_list_result = []
     projects = db["ASFBAH"]["project_list"].find({})
@@ -108,8 +130,10 @@ def get_list_all_project():
         my_list_result.append(project)
     return my_list_result
 
+
 def get_list_all_user():
     return None
+
 
 def get_all_project_by_date(date=None):
     if not date or date == 0:
@@ -174,7 +198,6 @@ def add_user(name, password):
 
 
 def add_user_session_uuid(username):
-
     my_user = get_user(username)
     if my_user:
         if "session_id" in my_user:

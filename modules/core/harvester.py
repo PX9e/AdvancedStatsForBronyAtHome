@@ -5,15 +5,15 @@ from multiprocessing.pool import Pool
 from importlib import import_module
 from modules.utils.config import config
 from modules.database.logging import log_something_harvester
-from modules.database.boinc_mongo import get_all_project
+from modules.database.boinc_mongo import get_all_project, clean_database_project
 
 
 class Singleton(type):
     """
-        This class allows the creation of singleton,
-        it is used to make Harvester as a singleton, it could
-        be useful in the future, when we will add remote control
-        of the Harvester.
+    Class which allows the creation of singleton,
+
+    It is used to make Harvester as a singleton, it could be useful in the future, when we will add remote control
+    of the Harvester.
     """
     _instances = {}
 
@@ -26,10 +26,10 @@ class Singleton(type):
 
 class Harvester(object, metaclass=Singleton):
     """
-    *Main class for harvesting.*
+    Main class for harvesting.
 
     This class is the class which do all the harvesting part
-    it will look into the database to find the differents project.
+    it will look into the database to find the different projects.
     And then run a process with the specified harvesting function and
     parameters specified in the database.
 
@@ -47,7 +47,6 @@ class Harvester(object, metaclass=Singleton):
                                         "A project without name in database " +
                                         str(project._id) + ", skipped ...")
             else:
-                print("initial add " + str(project["name"]))
                 if not project["frequency"]:
                     project["frequency"] = 3600
                     project["ETA"] = 0
@@ -75,7 +74,6 @@ class Harvester(object, metaclass=Singleton):
                                         + str(project._id) + ", skipped ...")
             else:
                 if not project["name"] in self._projects_name:
-                    print("refresh add " + str(project["name"]))
                     if not project["frequency"]:
                         project["frequency"] = 3600
                         project["ETA"] = 0
@@ -95,36 +93,32 @@ class Harvester(object, metaclass=Singleton):
         del self.refresh
         try:
             for project in self._projects:
-                print("analyzing: " + project["name"] + " ETA: " + str(
-                    project["ETA"]))
                 project["ETA"] -= self.interval
                 if project["ETA"] <= 0:
                     project["ETA"] = int(project["frequency"])
                     parameters = ()
-                    function_to_run = getattr(
-                        import_module("modules.core.harvesting_function"),
-                        project["harvesting_function"])
-                    variables_for_process = \
-                        function_to_run.__code__.co_varnames[
-                        :function_to_run.__code__.co_argcount]
+                    function_to_run = getattr(import_module("modules.core.harvesting_function"), project["harvesting_function"])
+                    variables_for_process = function_to_run.__code__.co_varnames[:function_to_run.__code__.co_argcount]
                     for arg in variables_for_process:
                         parameters += (project[arg],)
                     parameters = ((parameters,))
                     self.my_pool_of_processes.starmap_async(function_to_run,
                                                             parameters)
+
+            if self._cycle_number % 5 == 0:
+                self.update_configuration()
+            if self._cycle_number > 1440:
+                for project in self._projects:
+                    clean_database_project(project)
+                self._cycle_number = 0
+            self._cycle_number += 1
         except Exception as e:
             log_something_harvester("Harvester", "TYPE_ERROR", repr(e))
-
-        if self._cycle_number % 5 == 0:
-            self.update_configuration()
-        if self._cycle_number > 1440:
-            self._cycle_number = 0
-            pass
-        self._cycle_number +=1
 
     def stop(self):
         """
         Public method which allows to completely stop the harvester.
+
         It close the pool of process and stop the timer which periodically
         call the harvesting functions.
         """
@@ -132,10 +126,7 @@ class Harvester(object, metaclass=Singleton):
         self.my_pool_of_processes.close()
 
     def start(self):
-        """
-        Public method which allows to start the Harvester.
-        #FIXME: Don't restart the pool of processes !!
-        """
+        """ Public method which allows to start the Harvester. """
         #FIXME: Don't restart the pool of processes !!
         self.refresh = Timer(self.interval, self.check_state_timer)
         self.refresh.start()

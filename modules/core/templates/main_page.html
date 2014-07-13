@@ -36,9 +36,16 @@
         {% if projects %}
         <li>
             <a href="#">Projects</a>
-             <ul class="submenu flyout right">
-                {% for project in projects %}
-                <li><a href="#" onclick="getProjectData('{{project['name']}}')">{{project['representation']}}</a></li>
+            <ul class="submenu">
+               {% for category in projects %}
+                <li>
+                    <a> {{ category }}</a>
+                    <ul class="submenu flyout right">
+                    {% for project in projects[category] %}
+                        <li><a href="#" onclick="getProjectData('{{project['name']}}')">{{project['representation']}}</a></li>
+                    {% endfor %}
+                    </ul>
+                </li>
                 {% endfor %}
             </ul>
         </li>
@@ -55,6 +62,9 @@
         <div  class="ink-navigation all-25 ">
             <ul id="second_menu" class="menu vertical black vertical-space">
             </ul>
+        </div>
+        <div class="all-100" id="free_space">
+
         </div>
     </div>
 </div>

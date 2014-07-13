@@ -90,8 +90,16 @@ def get_summary():
 
 @app.route('/')
 def root():
-    return render_template('main_page.html', projects=get_list_all_project(),
-                           users=get_list_all_user())
+    projects_per_category = {}
+    projects_list = get_list_all_project()
+
+    for project in projects_list:
+        if project["category"] in projects_per_category:
+            projects_per_category[project["category"]].append(project)
+        else:
+            projects_per_category[project["category"]] = [project]
+
+    return render_template('main_page.html', projects=projects_per_category, users=get_list_all_user())
 
 
 @app.route('/harvester')

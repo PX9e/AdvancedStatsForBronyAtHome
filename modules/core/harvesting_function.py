@@ -1,6 +1,5 @@
 # coding=utf-8
 
-
 from os import path
 from time import time
 
@@ -131,7 +130,6 @@ def harvest_boinc_project(name, url, last_time_harvested):
 
 
 def harvest_folding_at_home_project(name="Folding@Home"):
-    team_result = TeamStat()
     try:
         log_something_harvester(name, TypeLog.Start, "STARTING ... ")
         start = time()
