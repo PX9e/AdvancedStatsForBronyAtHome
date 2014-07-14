@@ -70,3 +70,20 @@ function create_list_element(value) {
 //    description.innexText=;
 //
 //}
+
+
+function create_date_form() {
+
+    var form_div = document.createElement('div');
+    var form = document.createElement('form');
+
+
+    var input_date_start = document.createElement('input');
+
+    var input_date_end = document.createElement('input');
+
+    form.appendChild(input_date_start);
+    form.appendChild(input_date_end);
+    form_div.appendChild(form);
+
+}

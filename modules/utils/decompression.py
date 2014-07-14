@@ -25,7 +25,8 @@ def decompression(input_file, direct_output=False):
     else:
         output_file_path = input_file[0:len(input_file) - 3] + ".raw"
         output_file = open(str(output_file_path), "wb")
-        output_file.write(file_to_extract.read())
+        for line in file_to_extract:
+            output_file.write(line)
         file_to_extract.close()
         output_file.close()
 
