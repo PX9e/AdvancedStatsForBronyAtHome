@@ -18,7 +18,7 @@ def register_team_state_in_database(team_state_to_insert, project_name):
 
 
 def clean_database_project(project_name):
-    seventy_hours_in_sec = 259200
+    seventy_hours_in_sec = 259100
     twenty_four_hours_in_sec = 86400
 
     current_time = time.time()
@@ -32,7 +32,8 @@ def clean_database_project(project_name):
 
     data_points_to_process_sorted = sorted(data_points_to_process, key=lambda x: x["date"])
 
-    prima_date = 0
+
+    prima_date = 0-seventy_hours_in_sec - 1
 
     for data_point in data_points_to_process_sorted:
         if data_point["date"] - twenty_four_hours_in_sec < prima_date:

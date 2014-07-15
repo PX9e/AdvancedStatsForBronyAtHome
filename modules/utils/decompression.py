@@ -12,6 +12,7 @@ compression_signature = {
 def decompression(input_file, direct_output=False):
     """
     This function should extract our tarball,
+
     Exceptions are not handled !
     """
     first_line = open(input_file, "rb").readline(3)
@@ -24,10 +25,9 @@ def decompression(input_file, direct_output=False):
         return result
     else:
         output_file_path = input_file[0:len(input_file) - 3] + ".raw"
-        output_file = open(str(output_file_path), "wb")
-        for line in file_to_extract:
-            output_file.write(line)
+        with open(str(output_file_path), "wb") as output_file:
+            for line in file_to_extract:
+                output_file.write(line)
         file_to_extract.close()
-        output_file.close()
 
         return output_file_path

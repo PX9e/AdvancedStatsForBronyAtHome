@@ -101,6 +101,8 @@ def harvest_boinc_project(name, url, last_time_harvested):
             log_something_harvester(name, TypeLog.Info,
                                     "Downloading host file... ")
             users = search_users_in_file_by_id_boinc(file_pr, team_result["id"])
+            print("users")
+            print(users)
             team_result.attributs["team_data"]["members"] = len(users)
             file_to_extract = download_file(
                 url + files_to_download["host"]["file"] + ".gz",
@@ -109,6 +111,8 @@ def harvest_boinc_project(name, url, last_time_harvested):
             log_something_harvester(name, TypeLog.Info, "Extracting ... ")
             file_pr = decompression(file_to_extract, False)
             hosts = search_hosts_in_file_by_ids_boinc(file_pr, users)
+            print("hosts")
+            print(hosts)
             team_result.attributs["team_data"]["hosts"] = len(hosts)
             for project_data in info_table_xml:
                 team_result.attributs["project_data"][project_data] = \

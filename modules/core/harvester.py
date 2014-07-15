@@ -109,7 +109,7 @@ class Harvester(object, metaclass=Singleton):
                 self.update_configuration()
             if self._cycle_number > 1440:
                 for project in self._projects:
-                    clean_database_project(project)
+                    clean_database_project(project["name"])
                 self._cycle_number = 0
             self._cycle_number += 1
         except Exception as e:

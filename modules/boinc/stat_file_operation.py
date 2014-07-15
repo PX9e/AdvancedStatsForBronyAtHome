@@ -120,7 +120,7 @@ def search_hosts_in_file_by_ids_boinc(file_path, usersid):
     index_before_read = 0
     index_after_read = -1
     while index_after_read != index_before_read:
-        index_before_read = file_to_read.tell()
+        ind_before_read = file_to_read.tell()
         line = file_to_read.readline()
         tag = fast_search_tag(line)
         if tag == "host":
@@ -196,7 +196,6 @@ def search_team_in_file_by_name_boinc(file_path, name):
         index_after_read = file_to_read.tell()
 
     teamscores = sorted(teamscores, reverse=True)
-    print(teamscores)
     result_team["team_data"]["position"] = teamscores.index(
         result_team["team_data"]["total_credit"]) + 1
     result_team["project_data"]["total_teams"] = number_of_team
