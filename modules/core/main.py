@@ -1,10 +1,11 @@
 # coding=utf-8
 
 from time import sleep
+import os
+
 from modules.database.boinc_mongo import get_user,add_user
 from modules.utils.config import config, generate_secret_key
 
-import os
 
 if __name__ == "__main__":
     print("Core Ignition Starting...")

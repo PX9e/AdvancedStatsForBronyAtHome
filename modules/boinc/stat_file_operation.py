@@ -144,7 +144,7 @@ def search_hosts_in_file_by_ids_boinc(file_path, usersid):
     return hosts
 
 
-def search_team_in_file_by_name_boinc(file_path, name):
+def search_team_in_file_by_name_boinc(file_path, name, team_stats):
     from copy import deepcopy
     team_data_to_extract = ["total_credit", "expavg_credit", "expavg_time"]
     project_data_to_extract = []
@@ -157,7 +157,6 @@ def search_team_in_file_by_name_boinc(file_path, name):
     index_before_read = 0
     index_after_read = -1
     teamscores = []
-    number_of_team = 0
     while index_after_read != index_before_read:
         index_before_read = file_to_read.tell()
         line = file_to_read.readline()
@@ -171,7 +170,6 @@ def search_team_in_file_by_name_boinc(file_path, name):
             teamscores.append(temp_team["team_data"]["total_credit"])
             storing = False
             to_return = False
-            number_of_team += 1
         elif tag == "name":
             temp_team[tag] = fast_search_value(line)
             if temp_team[tag] == name:
@@ -196,14 +194,13 @@ def search_team_in_file_by_name_boinc(file_path, name):
         index_after_read = file_to_read.tell()
 
     teamscores = sorted(teamscores, reverse=True)
-    result_team["team_data"]["position"] = teamscores.index(
+    team_stats["team_data"]["position"] = teamscores.index(
         result_team["team_data"]["total_credit"]) + 1
-    result_team["project_data"]["total_teams"] = number_of_team
+    team_stats.update(result_team)
     if result_team:
         return result_team
     else:
-        raise NoProjectException(
-            "Critical Error: EOF reaches without finding the team")
+        raise NoProjectException("Critical Error: EOF reaches without finding the team")
 
 
 def fast_search_tag(line):
@@ -241,8 +238,8 @@ def db_dump_data_extraction(file_path, name):
     return result
 
 
-def db_tables_data_extraction(file_path, name):
-    file_to_read = open(file_path + name)
+def db_tables_data_extraction(file):
+    file_to_read = open(file)
     record_table = {}
     for line in file_to_read.readlines():
         if line.find("<update_time>") > -1:

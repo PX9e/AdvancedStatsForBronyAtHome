@@ -1,5 +1,4 @@
 # coding=utf-8
-from modules.boinc.stat_file_operation import TeamStat
 from modules.database.mongodb_operations_low import db
 from pymongo.son_manipulator import ObjectId
 from modules.utils.config import config
@@ -20,9 +19,7 @@ def register_team_state_in_database(team_state_to_insert, project_name):
 def clean_database_project(project_name):
     seventy_hours_in_sec = 259100
     twenty_four_hours_in_sec = 86400
-
     current_time = time.time()
-
     data_points = db["ASFBAH"]["project_stats"][project_name]["stats"].find({})
     data_points_to_process = []
 
@@ -31,8 +28,6 @@ def clean_database_project(project_name):
             data_points_to_process.append(data_point)
 
     data_points_to_process_sorted = sorted(data_points_to_process, key=lambda x: x["date"])
-
-
     prima_date = 0-seventy_hours_in_sec - 1
 
     for data_point in data_points_to_process_sorted:
@@ -42,9 +37,19 @@ def clean_database_project(project_name):
             prima_date = data_point["date"]
 
 
-def get_collection(project_name):
+def get_collection(project_name, timestart=None, timestop=None):
     final_result = []
-    for i in db["ASFBAH"]["project_stats"][project_name]["stats"].find({}):
+
+    request = {}
+    if timestart or timestop:
+        request["date"] = {}
+        if timestart:
+            request["date"]["$gte"] = timestart
+        if timestop:
+            request["date"]["$lte"] = timestop
+
+    result_request = db["ASFBAH"]["project_stats"][project_name]["stats"].find(request)
+    for i in result_request:
         temp = i
         del temp['_id']
         final_result.append(temp)

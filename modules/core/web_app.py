@@ -5,6 +5,8 @@ import json
 
 from flask import request, Response
 from flask.templating import render_template
+from flask import Flask
+from flask_login import LoginManager, login_required, login_user
 
 from modules.database.boinc_mongo import (get_collection, get_all_project,
                                           register_a_project,
@@ -15,12 +17,8 @@ from modules.database.boinc_mongo import (get_collection, get_all_project,
                                           get_list_all_project,
                                           get_list_all_user)
 from modules.database.logging import get_all_log_harvester
-
 from modules.boinc.stat_file_operation import ProjectConfiguration
 from modules.core.harvesting_function import list_functions
-from flask import Flask
-from flask_login import LoginManager, login_required, login_user
-
 from modules.utils.config import config
 
 
