@@ -120,7 +120,7 @@ def search_hosts_in_file_by_ids_boinc(file_path, usersid):
     index_before_read = 0
     index_after_read = -1
     while index_after_read != index_before_read:
-        ind_before_read = file_to_read.tell()
+        index_before_read = file_to_read.tell()
         line = file_to_read.readline()
         tag = fast_search_tag(line)
         if tag == "host":

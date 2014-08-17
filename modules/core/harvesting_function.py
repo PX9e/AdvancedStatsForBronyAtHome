@@ -161,6 +161,7 @@ def harvest_boinc_project(name, url, last_time_harvested):
             log_something_harvester(name, TypeLog.Info, "Extracting ... ")
             file_pr = decompression(file_to_extract)
             hosts = search_hosts_in_file_by_ids_boinc(file_pr, users)
+
             team_result.attributs["team_data"]["hosts"] = len(hosts)
             team_result = boinc_compute_extra_stats(team_result)
 
