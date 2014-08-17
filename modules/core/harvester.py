@@ -3,14 +3,13 @@
 from threading import Timer
 from multiprocessing.pool import Pool
 from importlib import import_module
-
+from traceback import print_exc
 from modules.utils.config import config
 from modules.database.logging import log_something_harvester
 from modules.database.boinc_mongo import get_all_project, clean_database_project
 
 
 class Singleton(type):
-
     """
     Class which allows the creation of singleton,
 
@@ -28,7 +27,6 @@ class Singleton(type):
 
 
 class Harvester(object, metaclass=Singleton):
-
     """
     Main class for harvesting.
 
@@ -47,12 +45,14 @@ class Harvester(object, metaclass=Singleton):
         self._cycle_number = 0
         for project in projects_from_mongo:
             if not "name" in project:
-                log_something_harvester("HARVESTER", "TYPE_ERROR", "A project without name in database " +
+                log_something_harvester("HARVESTER", "TYPE_ERROR",
+                                        "A project without name in database " +
                                         str(project._id) + ", skipped ...")
             else:
                 self.add_project(project)
         self.interval = int(config["ASFBAH"]["REFRESH_RATE"])
-        self.my_pool_of_processes = Pool(int(config["ASFBAH"]["CPU_CORE_TO_USE_FOR_HARVESTING"]))
+        self.my_pool_of_processes = Pool(
+            int(config["ASFBAH"]["CPU_CORE_TO_USE_FOR_HARVESTING"]))
         self.refresh = None
         self.check_state_timer()
 
@@ -67,7 +67,8 @@ class Harvester(object, metaclass=Singleton):
         projects_name = list(self._projects)
         for project in projects_from_mongo:
             if not "name" in project:
-                log_something_harvester("HARVESTER", "TYPE_ERROR", "A project without name in database "
+                log_something_harvester("HARVESTER", "TYPE_ERROR",
+                                        "A project without name in database "
                                         + str(project._id) + ", skipped ...")
             else:
                 if not project["name"] in self._projects:
@@ -78,7 +79,6 @@ class Harvester(object, metaclass=Singleton):
 
         for name in projects_name:
             del self._projects[name]
-
 
     def check_state_timer(self):
         """
@@ -100,8 +100,9 @@ class Harvester(object, metaclass=Singleton):
                 if project["ETA"] <= 0:
                     project["ETA"] = int(project["frequency"])
                     parameters = ()
-                    function_to_run = getattr(import_module("modules.core.harvesting_function"),
-                                              project["harvesting_function"])
+                    function_to_run = getattr(
+                        import_module("modules.core.harvesting_function"),
+                        project["harvesting_function"])
                     variables_for_process = function_to_run.__code__.co_varnames[:function_to_run.__code__.co_argcount]
                     for arg in variables_for_process:
                         parameters += (project[arg],)
@@ -116,7 +117,8 @@ class Harvester(object, metaclass=Singleton):
                 self._cycle_number = 0
             self._cycle_number += 1
         except Exception as e:
-            log_something_harvester("Harvester", "TYPE_ERROR", repr(e))
+
+            log_something_harvester("Harvester", "TYPE_ERROR", repr(e) + print_exc(10))
 
     def stop(self):
         """

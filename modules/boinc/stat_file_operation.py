@@ -196,7 +196,7 @@ def search_team_in_file_by_name_boinc(file_path, name, team_stats):
     teamscores = sorted(teamscores, reverse=True)
     team_stats["team_data"]["position"] = teamscores.index(
         result_team["team_data"]["total_credit"]) + 1
-    team_stats.update(result_team)
+    team_stats.attributs.update(result_team)
     if result_team:
         return result_team
     else:

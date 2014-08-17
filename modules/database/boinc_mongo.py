@@ -32,7 +32,8 @@ def clean_database_project(project_name):
 
     for data_point in data_points_to_process_sorted:
         if data_point["date"] - twenty_four_hours_in_sec < prima_date:
-            db["ASFBAH"]["project_stats"][project_name]["stats"].remove({'_id': data_point['_id']})
+            db["ASFBAH"]["project_stats"][project_name]["stats"].remove({'_id':
+                                                                             data_point['_id']})
         else:
             prima_date = data_point["date"]
 
