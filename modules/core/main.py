@@ -4,7 +4,7 @@ from time import sleep
 import os
 
 from modules.database.boinc_mongo import get_user,add_user
-from modules.utils.config import config, generate_secret_key
+from modules.utils.config import config, generate_secret_key, realpath
 
 
 if __name__ == "__main__":
@@ -18,8 +18,10 @@ if __name__ == "__main__":
 
     if not "SECRET_KEY" in config["ASFBAH"]:
         config["ASFBAH"]["SECRET_KEY"] = generate_secret_key(256)
-        config.write(open("asfbah.config", "r+"))
-
+        try:
+            config.write(open(realpath + os.sep + "asfbah-local.config", "r+"))
+        except:
+            config.write(open(realpath + os.sep + "asfbah.config", "r+"))
     user = get_user("Admin")
     if not user:
         print("No user Admin")
