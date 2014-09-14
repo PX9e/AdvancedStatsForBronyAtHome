@@ -44,4 +44,7 @@ if __name__ == "__main__":
     from modules.core.harvester import Harvester
     Harvester()
     print("Launching Gunicorn")
-    os.popen("gunicorn web_app:app -w 3 -b 0.0.0.0:5000")
+    realpath = os.path.realpath(__file__)
+    realpath = realpath[:realpath.rfind(os.sep)]
+
+    os.popen("gunicorn --chdir {0} web_app:app -w 3 -b 0.0.0.0:5000".format())

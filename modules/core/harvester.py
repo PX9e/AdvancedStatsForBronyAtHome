@@ -118,7 +118,7 @@ class Harvester(object, metaclass=Singleton):
             self._cycle_number += 1
         except Exception as e:
 
-            log_something_harvester("Harvester", "TYPE_ERROR", repr(e) + print_exc(10))
+            log_something_harvester("Harvester", "TYPE_ERROR", repr(e) + str(print_exc(10)))
 
     def stop(self):
         """
@@ -170,4 +170,4 @@ class Harvester(object, metaclass=Singleton):
         current_project = self._projects[project["name"]]
         for field in project:
             if current_project[field] != project[field]:
-                current_project = project[field]
+                current_project[field] = project[field]
