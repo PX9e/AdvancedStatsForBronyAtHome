@@ -3,20 +3,20 @@
 from os import path
 from time import time
 
-from modules.boinc.stat_file_operation import (db_tables_data_extraction,
+from ASFBAH.boinc.stat_file_operation import (db_tables_data_extraction,
                                                db_dump_data_extraction,
                                                search_team_in_file_by_name_boinc,
                                                search_team_in_file_by_name_fah,
                                                search_users_in_file_by_id_boinc,
                                                search_hosts_in_file_by_ids_boinc,
                                                TeamStat)
-from modules.database.boinc_mongo import (update_projects_harvest_time,
+from ASFBAH.database.boinc_mongo import (update_projects_harvest_time,
                                           register_stats_state_in_database)
-from modules.database.logging import log_something_harvester, TypeLog
-from modules.network.http_request_high_level import download_file
-from modules.utils.config import config
-from modules.utils.decompression import decompression
-from modules.utils.exceptions import NoProjectException
+from ASFBAH.database.logging import log_something_harvester, TypeLog
+from ASFBAH.network.http_request_high_level import download_file
+from ASFBAH.utils.config import config
+from ASFBAH.utils.decompression import decompression
+from ASFBAH.utils.exceptions import NoProjectException
 
 
 def boinc_compute_extra_stats(Team):

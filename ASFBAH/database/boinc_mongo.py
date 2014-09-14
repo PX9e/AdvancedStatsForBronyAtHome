@@ -1,7 +1,7 @@
 # coding=utf-8
-from modules.database.mongodb_operations_low import db
+from ASFBAH.database.mongodb_operations_low import db
 from pymongo.son_manipulator import ObjectId
-from modules.utils.config import config
+from ASFBAH.utils.config import config
 import uuid
 import time
 

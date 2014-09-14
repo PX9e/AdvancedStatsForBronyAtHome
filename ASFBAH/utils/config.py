@@ -1,17 +1,11 @@
 # coding=utf-8
 
 import configparser
-import os
-
-realpath = os.path.realpath(__file__)
-realpath = realpath[:realpath.rfind(os.sep)]
-
+import inspect, os
 
 config = configparser.ConfigParser()
-try:
-    config.read(realpath + os.sep + "asfbah-local.config")
-except:
-    config.read(realpath + os.sep + "asfbah.config")
+realpath = os.path.realpath(__file__)[:os.path.realpath(__file__).rfind(os.sep)+1]
+config.read(realpath +"asfbah.conf")
 
 
 def generate_secret_key(length):

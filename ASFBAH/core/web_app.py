@@ -8,7 +8,7 @@ from flask.templating import render_template
 from flask import Flask
 from flask_login import LoginManager, login_required, login_user
 
-from modules.database.boinc_mongo import (get_collection, get_all_project,
+from ASFBAH.database.boinc_mongo import (get_collection, get_all_project,
                                           register_a_project,
                                           get_projects_custom, update_a_project,
                                           remove_a_project, get_server_date,
@@ -16,10 +16,10 @@ from modules.database.boinc_mongo import (get_collection, get_all_project,
                                           identification, add_user_session_uuid,
                                           get_list_all_project,
                                           get_list_all_user)
-from modules.database.logging import get_all_log_harvester
-from modules.boinc.stat_file_operation import ProjectConfiguration
-from modules.core.harvesting_function import list_functions
-from modules.utils.config import config
+from ASFBAH.database.logging import get_all_log_harvester
+from ASFBAH.boinc.stat_file_operation import ProjectConfiguration
+from ASFBAH.core.harvesting_function import list_functions
+from ASFBAH.utils.config import config
 
 
 app = Flask(__name__)
@@ -58,7 +58,7 @@ def harvester_server_time():
 def login():
     if request.method == "POST":
         if identification(request.form["username"], request.form["password"]):
-            from modules.utils.users import user
+            from ASFBAH.utils.users import user
 
             my_responses = Response()
             my_responses.set_data(render_template('harvester_main_view.html',
@@ -223,8 +223,8 @@ def get_harvesting_log():
 
 @login_manager.user_loader
 def load_user(userid):
-    from modules.database.boinc_mongo import db
-    from modules.utils.users import user
+    from ASFBAH.database.boinc_mongo import db
+    from ASFBAH.utils.users import user
 
     users = db["ASFBAH"]["USERS"].find({"session_id": userid})
     if users.count() > 0:

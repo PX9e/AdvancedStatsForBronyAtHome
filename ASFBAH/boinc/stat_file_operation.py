@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import time
-from modules.utils.exceptions import NoProjectException
+from ASFBAH.utils.exceptions import NoProjectException
 
 
 class ProjectConfiguration:

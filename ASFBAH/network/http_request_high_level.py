@@ -4,10 +4,10 @@ from time import sleep
 from urllib import request, error
 from os.path import isfile
 
-from modules.utils.string_operation import (extract_file_type_from_url,
+from ASFBAH.utils.string_operation import (extract_file_type_from_url,
                                             try_to_extract_project_name_from_url
                                             )
-from modules.utils.config import config
+from ASFBAH.utils.config import config
 import os
 
 

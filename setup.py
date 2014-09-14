@@ -2,15 +2,13 @@ from distutils.core import setup
 
 setup(
     name='AdvancedStatsForBronyAtHome',
-    version='0.0.1',
-    packages=['modules.core', 'modules.boinc', 'modules.utils',
-              'modules.network', 'modules.database'],
-    package_dir={'modules': 'modules'},
+    version='',
+    package_data={'': ['*.conf']},
+    packages=['ASFBAH', 'ASFBAH.core',
+              'ASFBAH.boinc', 'ASFBAH.utils', 'ASFBAH.network', 'ASFBAH.database'],
     url='',
     license='',
     author='PXke',
-    author_email='guillaume.lastecoueres@techie.com',
+    author_email='',
     description=''
 )
-
-

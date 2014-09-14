@@ -1,7 +1,7 @@
 # coding=utf-8
 __author__ = 'guillaume'
 
-from modules.boinc.stat_file_operation import ProjectConfiguration
+from ASFBAH.boinc.stat_file_operation import ProjectConfiguration
 
 def load_boinc_project_from_wiki():
     from urllib.request import urlopen

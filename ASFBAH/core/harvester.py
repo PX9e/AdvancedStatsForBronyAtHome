@@ -4,9 +4,9 @@ from threading import Timer
 from multiprocessing.pool import Pool
 from importlib import import_module
 from traceback import print_exc
-from modules.utils.config import config
-from modules.database.logging import log_something_harvester
-from modules.database.boinc_mongo import get_all_project, clean_database_project
+from ASFBAH.utils.config import config
+from ASFBAH.database.logging import log_something_harvester
+from ASFBAH.database.boinc_mongo import get_all_project, clean_database_project
 
 
 class Singleton(type):
@@ -101,7 +101,7 @@ class Harvester(object, metaclass=Singleton):
                     project["ETA"] = int(project["frequency"])
                     parameters = ()
                     function_to_run = getattr(
-                        import_module("modules.core.harvesting_function"),
+                        import_module("ASFBAH.core.harvesting_function"),
                         project["harvesting_function"])
                     variables_for_process = function_to_run.__code__.co_varnames[:function_to_run.__code__.co_argcount]
                     for arg in variables_for_process:
