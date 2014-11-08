@@ -48,9 +48,8 @@ class Harvester(object, metaclass=Singleton):
         self._cycle_number = 0
         for project in projects_from_mongo:
             if not "name" in project:
-                log_something_harvester("HARVESTER", "TYPE_ERROR",
-                                        "A project without name in database " +
-                                        str(project._id) + ", skipped ...")
+                log_something_harvester("HARVESTER", "A project without name in database " +
+                                        str(project._id) + ", skipped ...", "TYPE_ERROR")
             else:
                 self.add_project(project)
         self.interval = int(config["ASFBAH"]["REFRESH_RATE"])
@@ -70,9 +69,8 @@ class Harvester(object, metaclass=Singleton):
         projects_name = list(self._projects)
         for project in projects_from_mongo:
             if not "name" in project:
-                log_something_harvester("HARVESTER", "TYPE_ERROR",
-                                        "A project without name in database "
-                                        + str(project._id) + ", skipped ...")
+                log_something_harvester("HARVESTER", "A project without name in database "
+                                        + str(project._id) + ", skipped ...", "TYPE_ERROR")
             else:
                 if not project["name"] in self._projects:
                     self.add_project(project)
@@ -120,7 +118,7 @@ class Harvester(object, metaclass=Singleton):
                 self._cycle_number = 0
             self._cycle_number += 1
         except Exception as e:
-            log_something_harvester("Harvester", "TYPE_ERROR", repr(e) + str(print_exc(10)))
+            log_something_harvester("Harvester", repr(e) + str(print_exc(10)), "TYPE_ERROR")
 
     def stop(self):
         """

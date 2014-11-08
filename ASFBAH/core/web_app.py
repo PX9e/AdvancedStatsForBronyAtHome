@@ -1,6 +1,5 @@
 # coding=utf-8
 
-
 import json
 
 from flask import request, Response
@@ -9,13 +8,13 @@ from flask import Flask
 from flask_login import LoginManager, login_required, login_user
 
 from ASFBAH.database.boinc_mongo import (get_collection, get_all_project,
-                                          register_a_project,
-                                          get_projects_custom, update_a_project,
-                                          remove_a_project, get_server_date,
-                                          get_all_project_by_date,
-                                          identification, add_user_session_uuid,
-                                          get_list_all_project,
-                                          get_list_all_user)
+                                         register_a_project,
+                                         get_projects_custom, update_a_project,
+                                         remove_a_project, get_server_date,
+                                         get_all_project_by_date,
+                                         identification, add_user_session_uuid,
+                                         get_list_all_project,
+                                         get_list_all_user)
 from ASFBAH.database.logging import get_all_log_harvester
 from ASFBAH.boinc.stat_file_operation import ProjectConfiguration
 from ASFBAH.core.harvesting_function import list_functions
@@ -67,8 +66,7 @@ def login():
             login_user(user(my_user))
             return my_responses
         else:
-            return render_template('login_view.html', message="Password or "
-                                                       "username invalid")
+            return render_template('login_view.html', message="Password or username invalid")
     return render_template('login_view.html')
 
 
@@ -82,9 +80,11 @@ def harvester_admin():
                            projects=projects_to_print,
                            list_function=list_functions)
 
+
 @app.route('/stats/summary')
 def get_summary():
-    o=0
+    o = 0
+
 
 @app.route('/')
 def root():
@@ -111,7 +111,7 @@ def harvester_main():
 
     return render_template('harvester_main_view.html', logs=list_log)
 
-
+@login_required
 @app.route('/harvester/admin/projectdeletion')
 def ajax_project_operation_deletion():
     parameter_ajax = request.args
@@ -120,24 +120,16 @@ def ajax_project_operation_deletion():
             parameter_ajax["id"] = parameter_ajax["id"][2:]
         result = remove_a_project(parameter_ajax["id"])
         if result["err"] is None:
-            return json.dumps({"text":
-                                   "The project has been deleted",
-                               "type":
-                                   "success"})
+            return json.dumps({"text": "The project has been deleted",
+                               "type": "success"})
         else:
-            return json.dumps({"text":
-                                   "The project has not been deleted, "
-                                   "error is:" +
-                                   str(result["err"]),
-                               "type":
-                                   "error"})
+            return json.dumps({"text": "The project has not been deleted, error is:{0}".format(result["err"]),
+                               "type": "error"})
     else:
-        return json.dumps({"text":
-                               "Complete chaos, no Id ! ",
-                           "type":
-                               "error"})
+        return json.dumps({"text": "Complete chaos, no Id ! ",
+                           "type": "error"})
 
-
+@login_required
 @app.route('/harvester/admin/projectoperation')
 def ajax_project_operation_addition():
     parameter_ajax = request.args
@@ -156,18 +148,12 @@ def ajax_project_operation_addition():
                 result = register_a_project(new_project)
                 if result is not None:
                     return json.dumps(
-                        {"text":
-                             "The project has been correctly added to the "
-                             "database",
-                         "type":
-                             "success"})
+                        {"text": "The project has been correctly added to the database",
+                         "type": "success"})
                 else:
                     return json.dumps(
-                        {"text":
-                             "The project has NOT been correctly added to the "
-                             "database",
-                         "type":
-                             "error"})
+                        {"text": "The project has NOT been correctly added to the database",
+                         "type": "error"})
             else:
                 return json.dumps("A project already have this name !")
         else:
@@ -182,22 +168,15 @@ def ajax_project_operation_addition():
                                           update_dict)
                 if result["err"] is None:
                     return json.dumps(
-                        {"text":
-                             "Update of the project is a success",
-                         "type":
-                             "success"})
+                        {"text": "Update of the project is a success",
+                         "type": "success"})
                 else:
                     return json.dumps(
-                        {"text":
-                             "Update of the project failed, error is:" + str(
-                                 result["err"]),
-                         "type":
-                             "error"})
+                        {"text": "Update of the project failed, error is:" + str(result["err"]),
+                         "type": "error"})
     else:
-        return json.dumps({"text":
-                               "Complete chaos, no Id ! ",
-                           "type":
-                               "error"})
+        return json.dumps({"text": "Complete chaos, no Id ! ",
+                           "type": "error"})
 
 
 @app.route('/harvester/log')

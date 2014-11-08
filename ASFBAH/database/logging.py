@@ -1,13 +1,21 @@
 # coding=utf-8
 
-
 import re
 import time
 
 from .mongodb_operations_low import db
 
 
-def log_something_harvester(module_name, type_of_message, message):
+class TypeLog():
+    """Define regular type of log message"""
+
+    Error = "TYPE_ERROR"
+    Info = "TYPE_INFO"
+    Start = "TYPE_START"
+    Complete = "TYPE_COMPLETE"
+
+
+def log_something_harvester(module_name, message, type_of_message=TypeLog.Info):
     """
     Log message in the database.
 
@@ -60,13 +68,3 @@ def get_all_log_harvester(limit=-1, parameter_ajax=None):
         return request.sort("datetime", order).limit(0)
     else:
         return request.sort("datetime", order).limit(limit)
-
-
-class TypeLog():
-
-    """Define regular type of log message"""
-
-    Error = "TYPE_ERROR"
-    Info = "TYPE_INFO"
-    Start = "TYPE_START"
-    Complete = "TYPE_COMPLETE"

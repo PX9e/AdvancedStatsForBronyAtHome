@@ -2,6 +2,8 @@
 
 import time
 
+from copy import deepcopy
+
 from ASFBAH.utils.exceptions import NoProjectException
 
 
@@ -61,27 +63,26 @@ class TeamStat:
 
 
 def search_team_in_file_by_name_fah(file_path, name):
-    file_to_read = open(file_path, "rb")
-    team_result = TeamStat()
-    pattern = "\t" + name + "\t"
-    index_before_read = 0
-    index_after_read = -1
-    while index_after_read != index_before_read:
-        index_before_read = file_to_read.tell()
-        line = file_to_read.readline()
-        oper = line.decode('latin1')
-        if oper.find(pattern) > -1:
-            the_line = oper.strip("\n")
-            the_data = the_line.split("\t")
-            team_result["id"] = the_data[0]
-            team_result["name"] = the_data[1]
-            team_result["team_data"]["total_credit"] = the_data[2]
-            team_result["project_data"]["wu"] = the_data[3]
-            team_result["project_type"] = "fah"
-            return team_result
-        index_after_read = file_to_read.tell()
-    raise NoProjectException(
-        "Critical Error: EOF reaches without finding the team")
+    with open(file_path, "rb") as file_to_read:
+        team_result = TeamStat()
+        pattern = "\t{0}\t".format(name)
+        index_before_read = 0
+        index_after_read = -1
+        while index_after_read != index_before_read:
+            index_before_read = file_to_read.tell()
+            line = file_to_read.readline()
+            oper = line.decode('latin1')
+            if oper.find(pattern) > -1:
+                the_line = oper.strip("\n")
+                the_data = the_line.split("\t")
+                team_result["id"] = the_data[0]
+                team_result["name"] = the_data[1]
+                team_result["team_data"]["total_credit"] = the_data[2]
+                team_result["project_data"]["wu"] = the_data[3]
+                team_result["project_type"] = "fah"
+                return team_result
+            index_after_read = file_to_read.tell()
+    raise NoProjectException("Critical Error: EOF reaches without finding the team")
 
 
 def search_users_in_file_by_id_boinc(file_path, teamid):
@@ -146,53 +147,52 @@ def search_hosts_in_file_by_ids_boinc(file_path, usersid):
 
 
 def search_team_in_file_by_name_boinc(file_path, name, team_stats):
-    from copy import deepcopy
     team_data_to_extract = ["total_credit", "expavg_credit", "expavg_time"]
     project_data_to_extract = []
     global_data_to_extract = ["name", "id"]
-    file_to_read = open(file_path)
-    temp_team = TeamStat().attributs
-    result_team = {}
-    to_return = False
-    storing = False
-    index_before_read = 0
-    index_after_read = -1
-    teamscores = []
-    while index_after_read != index_before_read:
-        index_before_read = file_to_read.tell()
-        line = file_to_read.readline()
-        tag = fast_search_tag(line)
-        if tag == "team":
-            storing = True
-        elif tag == "/team":
-            if to_return:
-                temp_team["project_type"] = "boinc"
-                result_team = deepcopy(temp_team)
-            teamscores.append(temp_team["team_data"]["total_credit"])
-            storing = False
-            to_return = False
-        elif tag == "name":
-            temp_team[tag] = fast_search_value(line)
-            if temp_team[tag] == name:
-                to_return = True
-        elif storing:
-            if tag in team_data_to_extract:
-                try:
-                    temp_team["team_data"][tag] = float(fast_search_value(line))
-                except ValueError:
-                    temp_team["team_data"][tag] = fast_search_value(line)
-            elif tag in project_data_to_extract:
-                try:
-                    temp_team["project_data"][tag] = float(fast_search_value(line))
-                except ValueError:
-                    temp_team["project_data"][tag] = fast_search_value(line)
-            elif tag in global_data_to_extract:
-                try:
-                    temp_team[tag] = float(fast_search_value(line))
-                except ValueError:
-                    temp_team[tag] = fast_search_value(line)
+    with open(file_path) as file_to_read:
+        temp_team = TeamStat().attributs
+        result_team = {}
+        to_return = False
+        storing = False
+        index_before_read = 0
+        index_after_read = -1
+        teamscores = []
+        while index_after_read != index_before_read:
+            index_before_read = file_to_read.tell()
+            line = file_to_read.readline()
+            tag = fast_search_tag(line)
+            if tag == "team":
+                storing = True
+            elif tag == "/team":
+                if to_return:
+                    temp_team["project_type"] = "boinc"
+                    result_team = deepcopy(temp_team)
+                teamscores.append(temp_team["team_data"]["total_credit"])
+                storing = False
+                to_return = False
+            elif tag == "name":
+                temp_team[tag] = fast_search_value(line)
+                if temp_team[tag] == name:
+                    to_return = True
+            elif storing:
+                if tag in team_data_to_extract:
+                    try:
+                        temp_team["team_data"][tag] = float(fast_search_value(line))
+                    except ValueError:
+                        temp_team["team_data"][tag] = fast_search_value(line)
+                elif tag in project_data_to_extract:
+                    try:
+                        temp_team["project_data"][tag] = float(fast_search_value(line))
+                    except ValueError:
+                        temp_team["project_data"][tag] = fast_search_value(line)
+                elif tag in global_data_to_extract:
+                    try:
+                        temp_team[tag] = float(fast_search_value(line))
+                    except ValueError:
+                        temp_team[tag] = fast_search_value(line)
 
-        index_after_read = file_to_read.tell()
+            index_after_read = file_to_read.tell()
 
     teamscores = sorted(teamscores, reverse=True)
     team_stats["team_data"]["position"] = teamscores.index(
@@ -218,7 +218,6 @@ def db_dump_data_extraction(file_path, name):
     file_to_read = open(file_path + name)
 
     result = {}
-
     record_table = {}
 
     for line in file_to_read.readlines():
@@ -240,23 +239,22 @@ def db_dump_data_extraction(file_path, name):
 
 
 def db_tables_data_extraction(file):
-    file_to_read = open(file)
     record_table = {}
-    for line in file_to_read.readlines():
-        if line.find("<update_time>") > -1:
-            value = fast_search_value(line)
-            record_table["last_update"] = int(value)
-        elif line.find("<nusers") > -1:
-            value = fast_search_value(line)
-            record_table["nusers"] = value
-        elif line.find("<nteams") > -1:
-            value = fast_search_value(line)
-            record_table["nteams"] = value
-        elif line.find("<nhosts") > -1:
-            value = fast_search_value(line)
-            record_table["nhosts"] = value
-        elif line.find("<total") > -1:
-            value = fast_search_value(line)
-            record_table["total_credit"] = value
-            break
+    with open(file) as file_to_read:
+        for line in file_to_read.readlines():
+            if line.find("<update_time>") > -1:
+                value = fast_search_value(line)
+                record_table["last_update"] = int(value)
+            elif line.find("<nusers") > -1:
+                value = fast_search_value(line)
+                record_table["nusers"] = value
+            elif line.find("<nteams") > -1:
+                value = fast_search_value(line)
+                record_table["nteams"] = value
+            elif line.find("<nhosts") > -1:
+                value = fast_search_value(line)
+                record_table["nhosts"] = value
+            elif line.find("<total") > -1:
+                value = fast_search_value(line)
+                record_table["total_credit"] = value
     return record_table
