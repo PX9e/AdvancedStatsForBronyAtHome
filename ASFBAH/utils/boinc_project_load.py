@@ -4,7 +4,6 @@ __author__ = 'guillaume'
 from ASFBAH.boinc.stat_file_operation import ProjectConfiguration
 
 def load_boinc_project_from_wiki():
-    from urllib.request import urlopen
     import time
     StartTime = time.time()
     # html = urlopen("http://boinc.berkeley.edu/wiki/Project_list").read().decode('utf-8')

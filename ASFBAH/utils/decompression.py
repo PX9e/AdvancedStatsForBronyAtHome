@@ -2,6 +2,7 @@
 import gzip
 import bz2
 from os import remove
+
 compression_signature = {
     b"\x1f\x8b\x08": gzip,
     b"BZh": bz2,
@@ -26,21 +27,19 @@ def decompression(input_file, direct_output=False, autodelete_file=True):
 
     :returns if direct_output is False a path of the extracted file either a list of lines.
     """
-    first_line = open(input_file, "rb").readline(3)
+    with open(input_file, "rb") as temp_file:
+        first_line = temp_file.readline(3)
 
-    file_to_extract = compression_signature[first_line].open(input_file, 'rb')
-
-    if direct_output:
-        result = file_to_extract.readlines()
-        file_to_extract.close()
-        if autodelete_file:
+    with compression_signature[first_line].open(input_file, 'rb') as file_to_extract:
+        if direct_output:
+            result = file_to_extract.readlines()
+            if autodelete_file:
+                remove(input_file)
+            return result
+        else:
+            output_file_path = input_file[0:len(input_file) - 3] + ".raw"
+            with open(output_file_path, "wb") as output_file:
+                for line in file_to_extract:
+                    output_file.write(line)
             remove(input_file)
-        return result
-    else:
-        output_file_path = input_file[0:len(input_file) - 3] + ".raw"
-        with open(str(output_file_path), "wb") as output_file:
-            for line in file_to_extract:
-                output_file.write(line)
-        file_to_extract.close()
-        remove(input_file)
-        return output_file_path
+            return output_file_path

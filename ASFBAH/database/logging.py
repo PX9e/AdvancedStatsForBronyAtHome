@@ -1,10 +1,10 @@
 # coding=utf-8
 
 
-from .mongodb_operations_low import db
-
 import re
 import time
+
+from .mongodb_operations_low import db
 
 
 def log_something_harvester(module_name, type_of_message, message):

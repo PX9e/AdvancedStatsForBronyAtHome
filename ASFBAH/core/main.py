@@ -1,5 +1,4 @@
 # coding=utf-8
-from time import sleep
 import os
 
 from ASFBAH.database.boinc_mongo import get_user, add_user

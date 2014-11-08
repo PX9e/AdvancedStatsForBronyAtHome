@@ -1,9 +1,11 @@
 # coding=utf-8
-from ASFBAH.database.mongodb_operations_low import db
-from pymongo.son_manipulator import ObjectId
-from ASFBAH.utils.config import config
 import uuid
 import time
+
+from pymongo.son_manipulator import ObjectId
+
+from ASFBAH.database.mongodb_operations_low import db
+from ASFBAH.utils.config import config
 
 
 def register_stats_state_in_database(team_state_to_insert, project_name):

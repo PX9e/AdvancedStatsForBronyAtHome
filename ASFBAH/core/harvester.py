@@ -4,12 +4,14 @@ from threading import Timer
 from multiprocessing.pool import Pool
 from importlib import import_module
 from traceback import print_exc
+
 from ASFBAH.utils.config import config
 from ASFBAH.database.logging import log_something_harvester
 from ASFBAH.database.boinc_mongo import get_all_project, clean_database_project
 
 
 class Singleton(type):
+
     """
     Class which allows the creation of singleton,
 
@@ -27,6 +29,7 @@ class Singleton(type):
 
 
 class Harvester(object, metaclass=Singleton):
+
     """
     Main class for harvesting.
 
@@ -117,7 +120,6 @@ class Harvester(object, metaclass=Singleton):
                 self._cycle_number = 0
             self._cycle_number += 1
         except Exception as e:
-
             log_something_harvester("Harvester", "TYPE_ERROR", repr(e) + str(print_exc(10)))
 
     def stop(self):

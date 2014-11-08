@@ -1,7 +1,7 @@
 # coding=utf-8
 
 import configparser
-import inspect, os
+import os
 
 config = configparser.ConfigParser()
 realpath = os.path.realpath(__file__)[:os.path.realpath(__file__).rfind(os.sep)+1]

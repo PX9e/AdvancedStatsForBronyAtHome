@@ -3,12 +3,12 @@
 from time import sleep
 from urllib import request, error
 from os.path import isfile
+import os
 
 from ASFBAH.utils.string_operation import (extract_file_type_from_url,
                                             try_to_extract_project_name_from_url
                                             )
 from ASFBAH.utils.config import config
-import os
 
 
 def download_file(url_of_file, path_to_write_file=None):
